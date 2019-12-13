@@ -1,6 +1,9 @@
 version: '3'
+
 services:
+
   nginx:
+    container_name: nginx
     build: ./nginx
     ports:
       - 80:80
@@ -12,8 +15,12 @@ services:
     networks:
       - koogua
     restart: always
+
   php:
-    build: ./php
+    container_name: php
+    build:
+      context: .
+      dockerfile: ./php/Dockerfile
     ports:
       - 9000:9000
     volumes:
@@ -22,7 +29,9 @@ services:
     networks:
       - koogua
     restart: always
+
   mysql:
+    container_name: mysql
     build: ./mysql
     ports:
       - 3306:3306
@@ -37,7 +46,9 @@ services:
     networks:
       - koogua
     restart: always
+
   redis:
+    container_name: redis
     build: ./redis
     ports:
       - 6379:6379
@@ -46,8 +57,12 @@ services:
     networks:
       - koogua
     restart: always
+
   xunsearch:
-    build: ./xunsearch
+    container_name: xunsearch
+    build:
+      context: .
+      dockerfile: ./xunsearch/Dockerfile
     ports:
       - 8383:8383
       - 8384:8384
@@ -56,6 +71,7 @@ services:
     networks:
       - koogua
     restart: always
+
 networks:
   koogua:
     driver: bridge
