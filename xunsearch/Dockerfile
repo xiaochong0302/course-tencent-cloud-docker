@@ -1,17 +1,13 @@
 FROM debian:stretch
 
-ARG TZ=Asia/Shanghai
-
 COPY ./sources.list /opt
 COPY ./xunsearch/xs-docker.sh /opt
-
-RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime \
-    && echo ${TZ} > /etc/timezone
 
 RUN cat /opt/sources.list > /etc/apt/sources.list \
     && apt-get update \
     && apt-get -y --no-install-recommends install wget make gcc g++ bzip2 zlib1g-dev \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /var/cache/apt/*
 
 RUN cd /tmp \
     && wget http://www.xunsearch.com/download/xunsearch-full-latest.tar.bz2 \

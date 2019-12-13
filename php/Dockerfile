@@ -1,13 +1,9 @@
 FROM php:7.3-fpm
 
-ARG TZ=Asia/Shanghai
 ARG PHALCON_VERSION=3.4.5
 ARG PHALCON_EXT_PATH=php7/64bits
 
 COPY ./sources.list /opt
-
-RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime \
-    && echo ${TZ} > /etc/timezone
 
 RUN cat /opt/sources.list > /etc/apt/sources.list \
     && apt-get update \
