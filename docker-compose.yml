@@ -1,0 +1,61 @@
+version: '3'
+services:
+  nginx:
+    build: ./nginx
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./html:/var/www/html
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/log:/var/log/nginx
+    networks:
+      - koogua
+    restart: always
+  php:
+    build: ./php
+    ports:
+      - 9000:9000
+    volumes:
+      - ./html:/var/www/html
+      - ./php/log:/var/log/php-fpm
+    networks:
+      - koogua
+    restart: always
+  mysql:
+    build: ./mysql
+    ports:
+      - 3306:3306
+    volumes:
+      - ./mysql/data:/usr/lib/mysql
+      - ./mysql/log:/var/log/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 1qaz2wsx3edc
+      MYSQL_DATABASE: ctc
+      MYSQL_USER: ctc
+      MYSQL_PASSWORD: ctc
+    networks:
+      - koogua
+    restart: always
+  redis:
+    build: ./redis
+    ports:
+      - 6379:6379
+    volumes:
+      - ./redis/data:/data
+    networks:
+      - koogua
+    restart: always
+  xunsearch:
+    build: ./xunsearch
+    ports:
+      - 8383:8383
+      - 8384:8384
+    volumes:
+      - ./xunsearch/data:/usr/local/xunsearch/data
+    networks:
+      - koogua
+    restart: always
+networks:
+  koogua:
+    driver: bridge
