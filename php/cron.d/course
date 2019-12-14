@@ -1,0 +1,2 @@
+# * * * * * root /usr/bin/php /var/www/html/course/scheduler.php 1>> /dev/null 2>&1
+* * * * * root echo "hello world" >> /var/log/cron.log

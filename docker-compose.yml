@@ -22,6 +22,7 @@ services:
     volumes:
       - ./html:/var/www/html
       - ./php/log:/var/log/php-fpm
+      - ./php/cron.d:/etc/cron.d
     networks:
       - koogua
     restart: always
