@@ -3,8 +3,7 @@ version: '3'
 services:
 
   nginx:
-    container_name: nginx
-    build: ./nginx
+    image: nginx:1.16
     ports:
       - 80:80
       - 443:443
@@ -17,10 +16,7 @@ services:
     restart: always
 
   php:
-    container_name: php
-    build:
-      context: .
-      dockerfile: ./php/Dockerfile
+    build: ./php
     ports:
       - 9000:9000
     volumes:
@@ -31,8 +27,7 @@ services:
     restart: always
 
   mysql:
-    container_name: mysql
-    build: ./mysql
+    image: mysql:5.7
     ports:
       - 3306:3306
     volumes:
@@ -48,8 +43,7 @@ services:
     restart: always
 
   redis:
-    container_name: redis
-    build: ./redis
+    image: redis:4.0
     ports:
       - 6379:6379
     volumes:
@@ -59,10 +53,7 @@ services:
     restart: always
 
   xunsearch:
-    container_name: xunsearch
-    build:
-      context: .
-      dockerfile: ./xunsearch/Dockerfile
+    image: hightman/xunsearch
     ports:
       - 8383:8383
       - 8384:8384
