@@ -1,7 +1,7 @@
 server {
 
     listen 80 default_server;
-    server_name ctc.com;
+    server_name ctc.docker;
 
     root /var/www/html/public;
     index index.html index.htm index.php;
