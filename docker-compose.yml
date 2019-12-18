@@ -3,7 +3,9 @@ version: '3'
 services:
 
   nginx:
-    image: nginx:1.16
+    build: ./nginx
+    image: ctc/nginx:latest
+    container_name: ctc-nginx
     ports:
       - 80:80
       - 443:443
@@ -28,7 +30,9 @@ services:
     restart: always
 
   mysql:
-    image: mysql:5.7
+    build: ./mysql
+    image: ctc/mysql:latest
+    container_name: ctc-mysql
     ports:
       - 3306:3306
     volumes:
@@ -44,7 +48,9 @@ services:
     restart: always
 
   redis:
-    image: redis:4.0
+    build: ./redis
+    image: ctc/redis:latest
+    container_name: ctc-redis
     ports:
       - 6379:6379
     volumes:
@@ -54,7 +60,9 @@ services:
     restart: always
 
   xunsearch:
-    image: hightman/xunsearch
+    build: ./xunsearch
+    image: ctc/xunsearch:latest
+    container_name: ctc-xunsearch
     ports:
       - 8383:8383
       - 8384:8384
