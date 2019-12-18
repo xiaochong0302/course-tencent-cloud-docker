@@ -27,8 +27,8 @@ services:
     volumes:
       - ./html:/var/www/html
       - ./php/log:/var/log/php-fpm
-      - ./php/conf.d/php.ini:/usr/local/etc/php/conf.d/php.ini
-      - ./php/supervisor/conf.d:/etc/supervisor/conf.d
+      - ./php/conf.d/php.ini:/usr/local/etc/php/conf.d/php.ini:ro
+      - ./php/supervisor/conf.d:/etc/supervisor/conf.d:ro
     networks:
       - koogua
     restart: always
