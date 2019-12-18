@@ -11,7 +11,8 @@ services:
       - 443:443
     volumes:
       - ./html:/var/www/html
-      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - ./nginx/log:/var/log/nginx
     networks:
       - koogua
@@ -19,12 +20,15 @@ services:
 
   php:
     build: ./php
+    image: ctc/php:latest
+    container_name: ctc-php
     ports:
       - 9000:9000
     volumes:
       - ./html:/var/www/html
       - ./php/log:/var/log/php-fpm
-      - ./php/cron.d:/etc/cron.d
+      - ./php/conf.d/php.ini:/usr/local/etc/php/conf.d/php.ini
+      - ./php/supervisor/conf.d:/etc/supervisor/conf.d
     networks:
       - koogua
     restart: always
@@ -36,7 +40,8 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - ./mysql/data:/usr/lib/mysql
+      - ./mysql/conf.d/my.cnf:/etc/mysql/conf.d/my.cnf:ro
+      - ./mysql/data:/var/lib/mysql
       - ./mysql/log:/var/log/mysql
     environment:
       MYSQL_ROOT_PASSWORD: 1qaz2wsx3edc
@@ -54,6 +59,7 @@ services:
     ports:
       - 6379:6379
     volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
       - ./redis/data:/data
     networks:
       - koogua
