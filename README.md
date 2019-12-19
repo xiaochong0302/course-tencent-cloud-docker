@@ -45,7 +45,7 @@
     docker run hello-world
     ```
 
-安装 docker-compose [install-compose](https://docs.docker.com/compose/install/#install-compose)
+安装 docker-compose，官方文档： [install-compose](https://docs.docker.com/compose/install/#install-compose)
 
 1. 下载 docker-compose
 
@@ -61,7 +61,7 @@
 
 ### 下载相关代码
 
-假定存目录 `/home/koogua`（可自定义）
+假定存在目录 `/home/koogua`（可自定义）
 
 通过 `git clone` 下载部署代码，原名字太长，我们用一个短名字
 
@@ -81,7 +81,7 @@ git clone https://gitee.com/koogua/course-tencent-cloud.git ctc
 
 1、修改 `/home/koogua/ctc-docker/docker-compose.yml` 中的相关参数
 
-更改 `mysql` 参数注意事项：密码不要用特殊字符（使用字母+数字） 
+修改 `mysql` 参数注意事项：密码不要用特殊字符（使用字母+数字） 
 
 ```
 MYSQL_ROOT_PASSWORD: 1qaz2wsx3edc
@@ -121,14 +121,14 @@ cp default.conf.sample default.conf
 
     ```
     cd /home/koogua/ctc-docker
-    docker build
+    docker-composer build
     ```
     
 2. 运行容器
  
      ```
      cd /home/koogua/ctc-docker
-     docker up -d
+     docker-compose up -d
      ```
      
 3. 访问网站
