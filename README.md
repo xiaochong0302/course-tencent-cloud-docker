@@ -81,7 +81,7 @@ git clone https://gitee.com/koogua/course-tencent-cloud.git ctc
 
 1、修改 `/home/koogua/ctc-docker/docker-compose.yml` 中的相关参数
 
-修改 mysql `MYSQL_ROOT_PASSWORD` 和 `MYSQL_PASSWORD` 其他参数默认。参数注意事项：密码不要用特殊字符（使用字母+数字） 
+修改 mysql `MYSQL_ROOT_PASSWORD` 和 `MYSQL_PASSWORD` 其他参数默认。密码不要用特殊字符（使用字母+数字） 
 
 ```
 MYSQL_ROOT_PASSWORD: 1qaz2wsx3edc
