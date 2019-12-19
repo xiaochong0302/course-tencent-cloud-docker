@@ -24,5 +24,3 @@ COPY ./cron.d/course /etc/cron.d/course
 
 RUN chown -R www-data:www-data /var/www/html \
     && chmod 644 /etc/cron.d/course
-
-CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]

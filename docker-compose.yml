@@ -29,6 +29,7 @@ services:
       - ./php/log:/var/log/php-fpm
       - ./php/conf.d/php.ini:/usr/local/etc/php/conf.d/php.ini:ro
       - ./php/supervisor/conf.d:/etc/supervisor/conf.d:ro
+    command: ["supervisord", "-n"]
     networks:
       - koogua
     restart: always
@@ -44,10 +45,10 @@ services:
       - ./mysql/data:/var/lib/mysql
       - ./mysql/log:/var/log/mysql
     environment:
-      MYSQL_ROOT_PASSWORD: 1qaz2wsx3edc
-      MYSQL_DATABASE: ctc
-      MYSQL_USER: ctc
-      MYSQL_PASSWORD: 1qaz2wsx3edc
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     networks:
       - koogua
     restart: always
@@ -61,6 +62,7 @@ services:
     volumes:
       - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
       - ./redis/data:/data
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
     networks:
       - koogua
     restart: always

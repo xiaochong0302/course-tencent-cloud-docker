@@ -79,15 +79,13 @@ git clone https://gitee.com/koogua/course-tencent-cloud.git ctc
 
 ### 配置运行环境
 
-1、修改 `/home/koogua/ctc-docker/docker-compose.yml` 中的相关参数
+1、修改构建配置
 
-修改 mysql `MYSQL_ROOT_PASSWORD` 和 `MYSQL_PASSWORD` 其他参数默认。密码不要用特殊字符（使用字母+数字） 
+复制生成 `.env` 并修改相关参数
 
 ```
-MYSQL_ROOT_PASSWORD: 1qaz2wsx3edc
-MYSQL_DATABASE: ctc
-MYSQL_USER: ctc
-MYSQL_PASSWORD: 1qaz2wsx3edc
+cd /home/koogua/ctc-docker
+cp .env.default .env
 ```
 
 2、配置 nginx 默认站点
