@@ -47,7 +47,7 @@ services:
       MYSQL_ROOT_PASSWORD: 1qaz2wsx3edc
       MYSQL_DATABASE: ctc
       MYSQL_USER: ctc
-      MYSQL_PASSWORD: ctc
+      MYSQL_PASSWORD: 1qaz2wsx3edc
     networks:
       - koogua
     restart: always
