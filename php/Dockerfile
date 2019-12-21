@@ -14,7 +14,7 @@ RUN echo "" > ${SOURCES_LIST} \
     && rm -rf /var/lib/apt/lists/*
 
 RUN docker-php-ext-install pcntl mbstring pdo_mysql \
-    && pecl install redis-4.1.1 \
+    && pecl install redis-4.3.0 \
     && docker-php-ext-enable redis
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
