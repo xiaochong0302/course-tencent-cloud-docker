@@ -14,7 +14,7 @@ RUN echo "" > ${SOURCES_LIST} \
     && rm -rf /var/lib/apt/lists/*
 
 RUN docker-php-ext-install pcntl mbstring pdo_mysql \
-    && pecl install redis-4.3.0 \
+    && pecl install redis \
     && docker-php-ext-enable redis
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
@@ -22,5 +22,4 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 
 COPY ./cron.d/course /etc/cron.d/course
 
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod 644 /etc/cron.d/course
+RUN chmod 644 /etc/cron.d/course

@@ -103,10 +103,17 @@ cp default.conf.sample default.conf
 
     ```
     cd /home/koogua/ctc-docker/html/ctc/config
-    cp config.default.php config.php
+    cp config.php.default config.php
+    ```
+
+2. 复制生成 `xs.course.ini`
+
+    ```
+    cd /home/koogua/ctc-docker/html/ctc/config
+    cp xs.course.ini.default xs.course.ini
     ```
     
-2. 修改存储目录权限
+3. 修改存储目录权限
 
     ```
     cd /home/koogua/ctc-docker/html/ctc
