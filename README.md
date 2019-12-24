@@ -90,11 +90,18 @@ cp .env.default .env
 
 2、配置 nginx 默认站点
 
-复制生成 `default.conf` 并修改相关参数
+无需HTTPS：复制生成 `default.conf` 并修改相关参数
 
 ```
 cd /home/koogua/ctc-docker/nginx/conf.d
 cp default.conf.sample default.conf
+```
+
+需要HTTPS：复制生成 `default.conf` 并修改相关参数
+
+```
+cd /home/koogua/ctc-docker/nginx/conf.d
+cp ssl-default.conf.sample default.conf
 ```
  
 3、修改项目配置
