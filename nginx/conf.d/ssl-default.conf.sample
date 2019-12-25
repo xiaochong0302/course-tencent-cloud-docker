@@ -10,11 +10,10 @@ server {
 
 server {
 
-    listen 443;
+    listen 443 ssl http2;
 
     server_name ctc.docker;
 
-    ssl on;
     ssl_certificate /etc/nginx/ssl/ctc.docker.crt;
     ssl_certificate_key /etc/nginx/ssl/ctc.docker.key;
     ssl_session_timeout 10m;
