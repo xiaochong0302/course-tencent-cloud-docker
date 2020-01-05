@@ -14,8 +14,8 @@ RUN echo "" > ${SOURCES_LIST} \
     && rm -rf /var/lib/apt/lists/*
 
 RUN docker-php-ext-install pcntl mbstring pdo_mysql \
-    && pecl install redis \
-    && docker-php-ext-enable redis
+    && pecl install redis-4.3.0 igbinary \
+    && docker-php-ext-enable redis igbinary
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
     && composer config -g repo.packagist composer https://mirrors.cloud.tencent.com/composer
