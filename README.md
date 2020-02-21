@@ -13,12 +13,24 @@
     ```
     sudo curl -sSL https://get.daocloud.io/docker | sh
     ```
-2. 启动 docker
+2. 更改 docker 仓库的默认地址
+   
+   修改 `/etc/docker/daemon.json` 文件（没有请自行创建）
+   
+   ```
+   {
+        "registry-mirrors": [
+            "https://mirror.ccs.tencentyun.com"
+        ]
+    }
+   ```
+   
+3. 启动 docker
 
     ```
     sudo service docker start
     ```
-    
+
 非 root 身份管理 docker，官方文档： [manage-docker-as-a-non-root-user](https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user)
 
 1. 创建用户组
@@ -50,7 +62,7 @@
 1. 下载 docker-compose
 
     ```
-    sudo curl -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    sudo curl -L https://get.daocloud.io/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     ```
 
 2. 给 docker-compose 增加执行权限
@@ -101,7 +113,7 @@ cp default.conf.sample default.conf
 
 ```
 cd /home/koogua/ctc-docker/nginx/conf.d
-cp ssl-default.conf.sample default.conf
+cp ssl-default.conf.sample ssl-default.conf
 ```
  
 3、修改项目配置

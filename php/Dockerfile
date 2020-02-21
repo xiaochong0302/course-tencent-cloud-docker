@@ -10,10 +10,10 @@ RUN echo "" > ${SOURCES_LIST} \
     && echo "deb http://mirrors.cloud.tencent.com/debian buster main contrib non-free" >> ${SOURCES_LIST} \
     && echo "deb http://mirrors.cloud.tencent.com/debian buster-updates main contrib non-free" >> ${SOURCES_LIST} \
     && apt-get update \
-    && apt-get install -y --no-install-recommends supervisor cron nano zip unzip \
+    && apt-get install -y --no-install-recommends supervisor cron nano zip unzip libpng-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN docker-php-ext-install pcntl mbstring pdo_mysql \
+RUN docker-php-ext-install pcntl mbstring pdo_mysql gd \
     && pecl install redis-4.3.0 igbinary \
     && docker-php-ext-enable redis igbinary
 
