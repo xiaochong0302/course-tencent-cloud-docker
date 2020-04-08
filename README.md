@@ -122,14 +122,14 @@ cp ssl-default.conf.sample ssl-default.conf
 
     ```
     cd /home/koogua/ctc-docker/html/ctc/config
-    cp config.php.default config.php
+    cp config.default.php config.php
     ```
 
 2. 复制生成 `xs.course.ini`
 
     ```
     cd /home/koogua/ctc-docker/html/ctc/config
-    cp xs.course.ini.default xs.course.ini
+    cp xs.course.default.ini xs.course.ini
     ```
     
 3. 修改存储目录权限
@@ -139,7 +139,7 @@ cp ssl-default.conf.sample ssl-default.conf
     chmod -R 777 storage
     ```
 
-### 构建运行站点
+### 构建运行
 
 1. 构建镜像
 
