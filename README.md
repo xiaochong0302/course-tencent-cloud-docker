@@ -15,7 +15,7 @@
     ```
 2. 更改 docker 仓库的默认地址
    
-   修改 `/etc/docker/daemon.json` 文件（没有请自行创建）
+   修改 /etc/docker/daemon.json 文件（没有请自行创建）
    
    ```
    {
@@ -73,16 +73,16 @@
 
 ### 下载相关代码
 
-假定存在目录 `/home/koogua`（可自定义）
+假定存在目录 /home/koogua（可自定义）
 
-通过 `git clone` 下载部署代码，原名字太长，我们用一个短名字
+通过 git clone 下载构建代码，原名字太长，我们用一个短名字
 
 ```
 cd /home/koogua
 git clone https://gitee.com/koogua/course-tencent-cloud-docker.git ctc-docker
 ```
 
-通过 `git clone` 下载项目代码，原名字太长，我们用一个短名字
+通过 git clone 下载项目代码，原名字太长，我们用一个短名字
 
 ```
 cd /home/koogua/ctc-docker/html
@@ -93,7 +93,7 @@ git clone https://gitee.com/koogua/course-tencent-cloud.git ctc
 
 1、修改构建配置
 
-复制生成 `.env` 并修改相关参数
+复制生成 .env 并修改相关参数
 
 ```
 cd /home/koogua/ctc-docker
@@ -102,14 +102,14 @@ cp .env.default .env
 
 2、配置 nginx 默认站点
 
-无需HTTPS：复制生成 `default.conf` 并修改相关参数
+无需HTTPS：复制生成 default.conf 并修改相关参数
 
 ```
 cd /home/koogua/ctc-docker/nginx/conf.d
 cp default.conf.sample default.conf
 ```
 
-需要HTTPS：复制生成 `default.conf` 并修改相关参数
+需要HTTPS：复制生成 default.conf 并修改相关参数
 
 ```
 cd /home/koogua/ctc-docker/nginx/conf.d
@@ -118,26 +118,35 @@ cp ssl-default.conf.sample ssl-default.conf
  
 3、修改项目配置
 
-1. 复制生成 `config.php` 并修改相关参数
+1. 复制生成 config.php 并修改相关参数
 
     ```
     cd /home/koogua/ctc-docker/html/ctc/config
     cp config.default.php config.php
     ```
 
-2. 复制生成 `xs.course.ini`
+2. 复制生成 xunsearch 配置文件
 
     ```
     cd /home/koogua/ctc-docker/html/ctc/config
     cp xs.course.default.ini xs.course.ini
+    cp xs.group.default.ini xs.group.ini
+    cp xs.user.default.ini xs.user.ini
     ```
     
-3. 修改存储目录权限
+3. 修改 storage 目录读写权限
 
     ```
     cd /home/koogua/ctc-docker/html/ctc
     chmod -R 777 storage
     ```
+   
+4. 修改 sitemap.xml 读写权限
+
+   ```
+   cd /home/koogua/ctc-docker/html/ctc/public
+   chmod -R 777 sitemap.xml
+   ```
 
 ### 构建运行
 
