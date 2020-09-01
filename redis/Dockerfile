@@ -1,4 +1,4 @@
-FROM redis:4.0
+FROM redis:5.0
 
 ARG TZ=Asia/Shanghai
 

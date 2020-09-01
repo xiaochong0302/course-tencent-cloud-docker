@@ -1,4 +1,4 @@
-FROM php:7.3-fpm
+FROM php:7.3-fpm-buster
 
 LABEL maintainer="xiaochong0302@qq.com"
 
