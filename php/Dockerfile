@@ -19,8 +19,6 @@ RUN set -xe && \
         ${PWD}/v${PHALCON_VERSION}.tar.gz \
         ${PWD}/cphalcon
 
-COPY docker-phalcon-* /usr/local/bin/
-
 RUN echo "" > ${SOURCES_LIST} \
     && echo "deb http://mirrors.cloud.tencent.com/debian buster main contrib non-free" >> ${SOURCES_LIST} \
     && echo "deb http://mirrors.cloud.tencent.com/debian buster-updates main contrib non-free" >> ${SOURCES_LIST} \
