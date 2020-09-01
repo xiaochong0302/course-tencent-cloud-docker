@@ -62,7 +62,7 @@
 1. 下载 docker-compose
 
     ```
-    sudo curl -L https://get.daocloud.io/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    sudo curl -L https://get.daocloud.io/docker/compose/releases/download/1.26.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     ```
 
 2. 给 docker-compose 增加执行权限
@@ -145,7 +145,7 @@ cp ssl-default.conf.sample ssl-default.conf
 
    ```
    cd /home/koogua/ctc-docker/html/ctc/public
-   chmod -R 777 sitemap.xml
+   chmod 777 sitemap.xml
    ```
 
 ### 构建运行
@@ -163,8 +163,40 @@ cp ssl-default.conf.sample ssl-default.conf
      cd /home/koogua/ctc-docker
      docker-compose up -d
      ```
-     
-3. 访问网站
+   
+3. 安装依赖包，初始化数据库
 
-   - 前台：http://{your-domain}.com/
-   - 后台：http://{your-domain}.com/admin
+    ```
+    docker exec -it ctc-php /bin/bash
+    cd /var/html/ctc
+    composer install --no-dev
+    vendor/bin/phinx migrate
+    ```
+     
+4. 访问网站
+
+   * 帐号：10000@163.com / 123456
+   * 前台：http://{your-domain}.com
+   * 后台：http://{your-domain}.com/admin
+   
+### 测试数据
+
+新装系统一片空白，为了更好的体验系统，我们提供部分测试数据（采集自网络）
+
+导入数据
+
+```
+docker exec -it ctc-mysql /bin/bash
+curl -L https://koogua.com/ctc-test.sql
+
+```
+
+生成索引
+
+```
+docker exec -it ctc-php /bin/bash
+cd /var/www/html/ctc
+php console.php course_index rebuild
+php console.php group_index rebuild
+php console.php user_index rebuild
+```
