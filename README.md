@@ -183,12 +183,15 @@ cp ssl-default.conf.sample ssl-default.conf
 
 新装系统一片空白，为了更好的体验系统，我们提供部分测试数据（采集自网络）
 
-导入数据
+**注意：导入操作会把初始化建立的表删除重新创建表**
+
+导入数据，mysql 容器中没有下载工具，需要安装一下
 
 ```
 docker exec -it ctc-mysql /bin/bash
-curl -L https://koogua.com/ctc-test.sql
-
+apt-get update && apt-get install curl
+curl -o test.sql.gz http://download.koogua.com/ctc/test.sql.gz
+gunzip < test.sql.gz | mysql -u ctc -p ctc
 ```
 
 生成索引
