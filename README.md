@@ -2,7 +2,7 @@
 
 #### 介绍
 
-为 course-tencent-cloud 提供环境支持
+本项目为 [course-tencent-cloud](https://gitee.com/koogua/course-tencent-cloud) 提供环境支持
 
 #### 安装 docker 和 docker-compose
 
@@ -175,15 +175,17 @@ cp ssl-default.conf.sample ssl-default.conf
      
 4. 访问网站
 
-   * 帐号：10000@163.com / 123456
-   * 前台：http://{your-domain}.com
-   * 后台：http://{your-domain}.com/admin
+   * 管理帐号：10000@163.com / 123456
+   * 前台地址：http://{your-domain}.com
+   * 后台地址：http://{your-domain}.com/admin
    
 ### 测试数据
 
 新装系统一片空白，为了更好的体验系统，我们提供部分测试数据（采集自网络）
 
 **注意：导入操作会把初始化建立的表删除重新创建表**
+
+管理帐号：100015@163.com / 123456
 
 导入数据，mysql 容器中没有下载工具，需要安装一下
 
