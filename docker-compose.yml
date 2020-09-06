@@ -25,6 +25,7 @@ services:
     container_name: ctc-php
     ports:
       - 9000:9000
+      - 8282:8282
     volumes:
       - ./html:/var/www/html
       - ./php/log:/var/log/php-fpm

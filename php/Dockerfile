@@ -26,7 +26,7 @@ RUN echo "" > ${SOURCES_LIST} \
     && apt-get install -y --no-install-recommends supervisor cron nano zip unzip libpng-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN docker-php-ext-install pcntl mbstring pdo_mysql gd \
+RUN docker-php-ext-install pdo_mysql pcntl mbstring bcmath gd \
     && pecl install igbinary redis \
     && docker-php-ext-enable igbinary redis
 

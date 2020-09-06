@@ -1,8 +1,6 @@
-# course-tencent-cloud-docker
+#### 项目介绍
 
-#### 介绍
-
-本项目为 [course-tencent-cloud](https://gitee.com/koogua/course-tencent-cloud) 提供环境支持
+为酷瓜云网课（腾讯云版） [course-tencent-cloud](https://gitee.com/koogua/course-tencent-cloud) 提供环境支持
 
 #### 安装 docker 和 docker-compose
 
