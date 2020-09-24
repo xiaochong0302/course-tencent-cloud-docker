@@ -190,8 +190,8 @@ cp ssl-default.conf.sample ssl-default.conf
 ```
 docker exec -it ctc-mysql /bin/bash
 apt-get update && apt-get install curl
-curl -o test.sql.gz http://download.koogua.com/ctc/test.sql.gz
-gunzip < test.sql.gz | mysql -u ctc -p ctc
+curl -o ctc.sql.gz http://download.koogua.com/ctc.sql.gz
+gunzip < ctc.sql.gz | mysql -u ctc -p ctc
 ```
 
 生成索引

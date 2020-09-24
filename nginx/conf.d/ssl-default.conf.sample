@@ -37,6 +37,14 @@ server {
         try_files $uri $uri/ /index.php?_url=$uri&$args;
     }
 
+    location /wss {
+        proxy_pass http://php:8282;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
     location ~ \.php$ {
 
         include fastcgi_params;

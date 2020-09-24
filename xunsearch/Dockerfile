@@ -1,4 +1,4 @@
-FROM hightman/xunsearch
+FROM hightman/xunsearch:latest
 
 ARG TZ=Asia/Shanghai
 
