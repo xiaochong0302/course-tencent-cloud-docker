@@ -89,8 +89,6 @@ cd /home/koogua/ctc-docker/nginx/conf.d
 cp ssl-default.conf.sample ssl-default.conf
 ```
 
-### 构建运行
-
 构建镜像
 
 ```
