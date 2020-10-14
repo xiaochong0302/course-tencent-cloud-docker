@@ -1,6 +1,6 @@
 #### 项目介绍
 
-为酷瓜云网课（腾讯云版） [course-tencent-cloud](https://gitee.com/koogua/course-tencent-cloud) 提供环境支持
+为酷瓜云课堂（腾讯云版） [course-tencent-cloud](https://gitee.com/koogua/course-tencent-cloud) 提供环境支持
 
 #### 安装 docker 和 docker-compose
 
@@ -93,7 +93,7 @@ cp ssl-default.conf.sample ssl-default.conf
 
 ```
 cd /home/koogua/ctc-docker
-docker-composer build
+docker-compose build
 ```
     
 运行容器
@@ -152,6 +152,12 @@ composer install --no-dev
 cd /var/html/ctc
 vendor/bin/phinx migrate
 ```
+
+执行升级
+
+```
+php console.php upgrade
+```
  
 访问网站
 
@@ -196,5 +202,10 @@ cd /var/www/html/ctc
 php console.php course_index rebuild
 php console.php group_index rebuild
 php console.php user_index rebuild
+```
+
+（4）执行升级
+
+```
 php console.php upgrade
 ```
