@@ -156,6 +156,7 @@ vendor/bin/phinx migrate
 执行升级
 
 ```
+cd /var/www/html/ctc
 php console.php upgrade
 ```
  
@@ -207,5 +208,6 @@ php console.php user_index rebuild
 （4）执行升级
 
 ```
+cd /var/www/html/ctc
 php console.php upgrade
 ```
