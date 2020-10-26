@@ -114,14 +114,14 @@ docker exec -it ctc-php bash
 复制生成 config.php 并修改相关参数
 
 ```
-cd /var/html/ctc/config
+cd /var/www/html/ctc/config
 cp config.default.php config.php
 ```
 
 复制生成 xunsearch 配置文件
 
 ```
-cd /var/html/ctc/config
+cd /var/www/html/ctc/config
 cp xs.course.default.ini xs.course.ini
 cp xs.group.default.ini xs.group.ini
 cp xs.user.default.ini xs.user.ini
@@ -130,26 +130,26 @@ cp xs.user.default.ini xs.user.ini
 修改 storage 目录读写权限
 
 ```
-chmod -R 777 /var/html/ctc/storage
+chmod -R 777 /var/www/html/ctc/storage
 ```
    
 修改 sitemap.xml 文件读写权限
 
 ```
-chmod 777 /var/html/ctc/public/sitemap.xml
+chmod 777 /var/www/html/ctc/public/sitemap.xml
 ```
 
 安装依赖包
    
 ```
-cd /var/html/ctc
+cd /var/www/html/ctc
 composer install --no-dev
 ```
 
 数据库迁移
 
 ```
-cd /var/html/ctc
+cd /var/www/html/ctc
 vendor/bin/phinx migrate
 ```
 
