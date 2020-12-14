@@ -24,8 +24,9 @@ services:
     image: ctc/php:latest
     container_name: ctc-php
     ports:
-      - 9000:9000
       - 8282:8282
+    expose:
+      - 9000
     volumes:
       - ./html:/var/www/html
       - ./php/log:/var/log/php-fpm
@@ -40,8 +41,8 @@ services:
     build: ./mysql
     image: ctc/mysql:latest
     container_name: ctc-mysql
-    ports:
-      - 3306:3306
+    expose:
+      - 3306
     volumes:
       - ./mysql/conf.d/my.cnf:/etc/mysql/conf.d/my.cnf:ro
       - ./mysql/data:/var/lib/mysql
@@ -59,8 +60,8 @@ services:
     build: ./redis
     image: ctc/redis:latest
     container_name: ctc-redis
-    ports:
-      - 6379:6379
+    expose:
+      - 6379
     volumes:
       - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
       - ./redis/data:/data
@@ -73,9 +74,9 @@ services:
     build: ./xunsearch
     image: ctc/xunsearch:latest
     container_name: ctc-xunsearch
-    ports:
-      - 8383:8383
-      - 8384:8384
+    expose:
+      - 8383
+      - 8384
     volumes:
       - ./xunsearch/data:/usr/local/xunsearch/data
     networks:
