@@ -133,10 +133,10 @@ cp xs.user.default.ini xs.user.ini
 chmod -R 777 /var/www/html/ctc/storage
 ```
    
-修改 sitemap.xml 文件读写权限
+创建 sitemap.xml 软链接
 
 ```
-chmod 777 /var/www/html/ctc/public/sitemap.xml
+ln -s /var/www/html/ctc/storage/tmp/sitemap.xml /var/www/html/ctc/public/sitemap.xml
 ```
 
 安装依赖包
