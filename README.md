@@ -144,6 +144,7 @@ ln -s /var/www/html/ctc/storage/tmp/sitemap.xml /var/www/html/ctc/public/sitemap
 ```
 cd /var/www/html/ctc
 composer install --no-dev
+composer dump-autoload --optimize
 ```
 
 数据库迁移
