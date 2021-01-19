@@ -2,7 +2,7 @@
 
 # ----------- 请根据实际情况，修改如下配置 ------------ #
 
-#是否安装测试数据(on：是，off:否)
+#是否安装测试数据(on:是，off:否)
 SITE_DEMO=off
 
 #站点域名(不包括http)
@@ -30,6 +30,10 @@ REDIS_PASSWORD=1qaz2wsx3edc
 
 #安装git和curl
 sudo apt-get update && apt-get install -y curl git
+
+if [ ! -d '/etc/docker' ]; then
+  mkdir -p "/etc/docker"
+fi
 
 #写入docker配置
 sudo echo '{"registry-mirrors": ["https://mirror.ccs.tencentyun.com"]}' | tee /etc/docker/daemon.json
