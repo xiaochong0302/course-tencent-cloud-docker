@@ -30,7 +30,8 @@ RUN docker-php-ext-install pdo_mysql pcntl mbstring bcmath gd \
     && pecl install igbinary redis \
     && docker-php-ext-enable igbinary redis
 
-RUN curl https://mirrors.aliyun.com/composer/composer.phar -o /usr/local/bin/composer
+RUN curl https://mirrors.aliyun.com/composer/composer.phar -o /usr/local/bin/composer \
+    && chmod +x /usr/local/bin/composer
 
 COPY ./cron.d/course /etc/cron.d/course
 

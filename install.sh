@@ -31,16 +31,15 @@ REDIS_PASSWORD=1qaz2wsx3edc
 #安装git和curl
 sudo apt-get update && apt-get install -y curl git
 
-if [ ! -d '/etc/docker' ]; then
-  mkdir -p "/etc/docker"
-fi
-
-#写入docker配置
-sudo echo '{"registry-mirrors": ["https://mirror.ccs.tencentyun.com"]}' | tee /etc/docker/daemon.json
-
 #安装docker
 if [ -z "$(command -v docker)" ]; then
   sudo curl -sSL https://get.daocloud.io/docker | sh
+fi
+
+#写入docker配置
+if [ ! -d '/etc/docker' ]; then
+  mkdir -p "/etc/docker"
+  sudo echo '{"registry-mirrors": ["https://mirror.ccs.tencentyun.com"]}' | tee /etc/docker/daemon.json
 fi
 
 #启动docker
