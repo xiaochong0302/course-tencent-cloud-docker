@@ -23,15 +23,14 @@ RUN echo "" > ${SOURCES_LIST} \
     && echo "deb http://mirrors.cloud.tencent.com/debian buster main contrib non-free" >> ${SOURCES_LIST} \
     && echo "deb http://mirrors.cloud.tencent.com/debian buster-updates main contrib non-free" >> ${SOURCES_LIST} \
     && apt-get update \
-    && apt-get install -y --no-install-recommends supervisor cron nano zip unzip libpng-dev \
+    && apt-get install -y --no-install-recommends git supervisor cron nano zip unzip libpng-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN docker-php-ext-install pdo_mysql pcntl mbstring bcmath gd \
     && pecl install igbinary redis \
     && docker-php-ext-enable igbinary redis
 
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
-    && composer config -g repo.packagist composer https://mirrors.cloud.tencent.com/composer
+RUN curl https://mirrors.aliyun.com/composer/composer.phar -o /usr/local/bin/composer \
 
 COPY ./cron.d/course /etc/cron.d/course
 
