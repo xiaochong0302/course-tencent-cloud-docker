@@ -1,214 +1,76 @@
-#### 项目介绍
+### 项目介绍
 
 为酷瓜云课堂（腾讯云版） [course-tencent-cloud](https://gitee.com/koogua/course-tencent-cloud) 提供环境支持
 
-#### 安装 docker 和 docker-compose
+### 安装指南
 
-安装 docker， 官方文档： [install-docker](https://docs.docker.com/install/linux/docker-ce/debian/#install-using-the-convenience-script)
-
-下载 docker
+下载 [安装脚本](https://gitee.com/koogua/course-tencent-cloud-docker/install.sh)
 
 ```
-sudo curl -sSL https://get.daocloud.io/docker | sh
+cd ~ && curl http://download.koogua.com/install.sh -o install.sh
 ```
 
-更改 docker 仓库的默认地址
-
-修改 /etc/docker/daemon.json 文件（没有请自行创建）
-
+给脚本增加执行权限
 ```
-{
-    "registry-mirrors": [
-        "https://mirror.ccs.tencentyun.com"
-    ]
-}
+chmod +x install.sh
 ```
 
-启动 docker
+根据实际情况修改配置
 
 ```
-sudo service docker start
+nano install.sh
 ```
 
-安装 docker-compose，官方文档： [install-compose](https://docs.docker.com/compose/install/#install-compose)
-
-下载 docker-compose
+可选配置项目如下：
 
 ```
-sudo curl -L "https://get.daocloud.io/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+#是否安装测试数据(on:是，off:否)
+SITE_DEMO=off
+
+#站点域名(不包括http)
+SITE_DOMAIN=abc.com
+
+#站点密钥(数字字母组合，不要用特殊字符)
+SITE_KEY=1qaz2wsx3edc
+
+#mysql超级用户密码（数字字母组合，不要用特殊字符）
+MYSQL_ROOT_PASSWORD=1qaz2wsx3edc
+
+#mysql项目数据库名称（数字字母组合，不要用特殊字符）
+MYSQL_DATABASE=ctc
+
+#mysql项目数据库用户（数字字母组合，不要用特殊字符）
+MYSQL_USER=ctc
+
+#mysql项目数据库密码（数字字母组合，不要用特殊字符）
+MYSQL_PASSWORD=1qaz2wsx3edc
+
+#redis访问密码（数字字母组合，不要用特殊字符）
+REDIS_PASSWORD=1qaz2wsx3edc
 ```
 
-给 docker-compose 增加执行权限
+执行安装，快慢取决于网络，当有错误或者超时请重试
 
 ```
-sudo chmod +x /usr/local/bin/docker-compose
+bash install.sh
 ```
 
-### 下载相关代码
-
-假定存在目录 `/home/koogua`
-
-通过 git clone 下载构建代码，原名字太长，我们用一个短名字
-
-```
-cd /home/koogua
-git clone https://gitee.com/koogua/course-tencent-cloud-docker.git ctc-docker
-```
-
-通过 git clone 下载项目代码，原名字太长，我们用一个短名字
-
-```
-cd /home/koogua/ctc-docker/html
-git clone https://gitee.com/koogua/course-tencent-cloud.git ctc
-```
-
-### 配置运行环境
-
-（1）修改构建配置
-
-复制生成 .env 并修改相关参数
-
-```
-cd /home/koogua/ctc-docker
-cp .env.default .env
-```
-
-（2）配置 nginx 默认站点
-
-无需HTTPS：复制生成 default.conf 并修改相关参数
-
-```
-cd /home/koogua/ctc-docker/nginx/conf.d
-cp default.conf.sample default.conf
-```
-
-需要HTTPS：复制生成 default.conf 并修改相关参数
-
-```
-cd /home/koogua/ctc-docker/nginx/conf.d
-cp ssl-default.conf.sample ssl-default.conf
-```
-
-构建镜像
-
-```
-cd /home/koogua/ctc-docker
-docker-compose build
-```
-    
-运行容器
- 
- ```
- cd /home/koogua/ctc-docker
- docker-compose up -d
- ```
-   
-### 配置应用
-
-进入 php 容器
-
-```
-docker exec -it ctc-php bash
-```
-
-复制生成 config.php 并修改相关参数
-
-```
-cd /var/www/html/ctc/config
-cp config.default.php config.php
-```
-
-复制生成 xunsearch 配置文件
-
-```
-cd /var/www/html/ctc/config
-cp xs.course.default.ini xs.course.ini
-cp xs.group.default.ini xs.group.ini
-cp xs.user.default.ini xs.user.ini
-```
-
-修改 storage 目录读写权限
-
-```
-chmod -R 777 /var/www/html/ctc/storage
-```
-   
-创建 sitemap.xml 软链接
-
-```
-ln -s /var/www/html/ctc/storage/tmp/sitemap.xml /var/www/html/ctc/public/sitemap.xml
-```
-
-安装依赖包
-   
-```
-cd /var/www/html/ctc
-composer install --no-dev
-composer dump-autoload --optimize
-```
-
-数据库迁移
-
-```
-cd /var/www/html/ctc
-vendor/bin/phinx migrate
-```
-
-执行升级
-
-```
-cd /var/www/html/ctc
-php console.php upgrade
-```
- 
-访问网站
+### 访问网站
 
 * 管理帐号：10000@163.com / 123456
 * 前台地址：http://{your-domain}.com
 * 后台地址：http://{your-domain}.com/admin
 
-后续设置： [腾讯云服务和应用设置](https://gitee.com/koogua/course-tencent-cloud/wikis) 
+后续设置： [系统设置](https://gitee.com/koogua/course-tencent-cloud/wikis) 
    
 ### 测试数据
 
-新装系统一片空白，为了更好的体验系统，我们提供部分测试数据（采集自网络）
-
-**注意：导入操作会把初始化建立的表删除并重新创建表**
-
 管理帐号：100015@163.com / 123456
 
-（1）导入资源文件
+### 结束安装
 
-在腾讯云存储新建一个存储桶（bucket）, 并在后台->系统配置->存储设置修改相关参数
-
-下载资源文件，解压后使用 COSBrowser 上传 img 等相关目录到新建的存储桶中
-
-[资源文件下载](http://download.koogua.com/ctc-test-cos.zip)
-
-[COSBrowser工具介绍](https://cloud.tencent.com/document/product/436/11366)
-
-（2）导入数据，mysql 容器中没有下载工具，需要安装一下
+安装完成，请删除安装脚本
 
 ```
-docker exec -it ctc-mysql bash
-apt-get update && apt-get install curl
-curl -o ctc-test.sql.gz http://download.koogua.com/ctc-test.sql.gz
-gunzip < ctc-test.sql.gz | mysql -u ctc -p ctc
-```
-
-（3）重建索引
-
-```
-docker exec -it ctc-php bash
-cd /var/www/html/ctc
-php console.php course_index rebuild
-php console.php group_index rebuild
-php console.php user_index rebuild
-```
-
-（4）执行升级
-
-```
-cd /var/www/html/ctc
-php console.php upgrade
+rm install.sh
 ```

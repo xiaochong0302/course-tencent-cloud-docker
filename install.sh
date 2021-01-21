@@ -26,32 +26,75 @@ MYSQL_PASSWORD=1qaz2wsx3edc
 #redis访问密码（数字字母组合，不要用特殊字符）
 REDIS_PASSWORD=1qaz2wsx3edc
 
-# --------------- !!! 以下内容，请勿修改!!! --------------- #
+# ------------ @@@ 以下内容，非专业人士请勿修改，新手请远离！ @@@ ------------- #
+
+#成功信息输出
+success_print() {
+  echo -e "\033[32m $1 \033[0m"
+}
+
+#失败信息输出
+error_print() {
+  echo -e "\033[31m $1 \033[0m"
+}
+
+#系统判断
+os_type() {
+  os=$(grep "^ID=" /etc/os-release)
+  if [[ ${os} =~ 'centos' ]]; then
+    echo 'centos'
+  elif [[ ${os} =~ 'ubuntu' ]]; then
+    echo 'ubuntu'
+  elif [[ ${os} =~ 'debian' ]]; then
+    echo 'debian'
+  else
+    echo 'other'
+  fi
+}
 
 #安装git和curl
-sudo apt-get update && apt-get install -y curl git
+if [ "$(os_type)" = 'ubuntu' ] || [ "$(os_type)" = 'debian' ]; then
+  sudo apt-get update && apt-get install -y curl git
+elif [ "$(os_type)" = 'centos' ]; then
+  sudo yum update && yum install -y curl git
+else
+  error_print "\n------ sorry, we only support ubuntu,debian,centos currently. ------\n"
+  exit
+fi
 
 #安装docker
 if [ -z "$(command -v docker)" ]; then
   sudo curl -sSL https://get.daocloud.io/docker | sh
 fi
 
-#写入docker配置
+if [ -z "$(command -v docker)" ]; then
+  error_print "\n------ error: docker command not found, please try again. ------\n"
+  exit
+fi
+
 if [ ! -d '/etc/docker' ]; then
-  mkdir -p "/etc/docker"
+  mkdir -p '/etc/docker'
+fi
+
+#docker镜像加速
+if [ ! -e '/etc/docker/daemon.json' ]; then
   sudo echo '{"registry-mirrors": ["https://mirror.ccs.tencentyun.com"]}' | tee /etc/docker/daemon.json
 fi
 
-#启动docker
-sudo service docker start
+#重启docker
+sudo systemctl daemon-reload
+sudo systemctl restart docker
 
 #安装docker-composer
 if [ -z "$(command -v docker-compose)" ]; then
   sudo curl -L "https://get.daocloud.io/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+  sudo chmod +x /usr/local/bin/docker-compose
 fi
 
-#docker-compose增加执行权限
-sudo chmod +x /usr/local/bin/docker-compose
+if [ -z "$(command -v docker-compose)" ]; then
+  error_print "\n------ error: docker-compose command not found, please try again. ------\n"
+  exit
+fi
 
 #基准目录
 base_dir=~/ctc-docker
@@ -62,11 +105,15 @@ ctc_dir=${base_dir}/html/ctc
 #克隆ctc-docker项目
 if [ ! -d ${base_dir} ]; then
   git clone https://gitee.com/koogua/course-tencent-cloud-docker.git ${base_dir}
+else
+  cd ${base_dir} && git pull
 fi
 
 #克隆ctc项目
 if [ ! -d ${ctc_dir} ]; then
   git clone https://gitee.com/koogua/course-tencent-cloud.git ${ctc_dir}
+else
+  cd ${ctc_dir} && git pull
 fi
 
 #docker .env文件
@@ -122,20 +169,20 @@ docker-compose build
 docker-compose up -d
 
 #导入测试数据
-if [ ${SITE_DEMO} == 'on' ]; then
-
-  echo -e "\n------ start import demo data ------\n"
+if [ ${SITE_DEMO} = 'on' ]; then
 
   docker exec -i ctc-mysql bash <<'EOF'
+
+  echo -e "\n------ start import demo data ------\n"
 
   #安装curl
   apt-get update && apt-get install -y curl
 
   #下载数据
-  curl http://download.koogua.com/ctc-test.sql.gz -o ctc-test.sql.gz
+  cd ~ && curl http://download.koogua.com/ctc-demo.sql.gz -o ctc-demo.sql.gz
 
   #导入数据
-  gunzip < ctc-test.sql.gz | mysql -u ${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_DATABASE}
+  gunzip < ctc-demo.sql.gz | mysql -u ${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_DATABASE}
 
   echo -e "\n------ finish import demo data ------\n"
 
@@ -167,8 +214,11 @@ cd ${ctc_dir}
 composer install --no-dev
 composer dump-autoload --optimize
 
-#执行升级
+#数据迁移
 vendor/bin/phinx migrate
+
+#程序升级
+php console.php upgrade
 
 #重建xunsearch索引
 php console.php course_index rebuild
@@ -178,5 +228,34 @@ php console.php user_index rebuild
 exit
 EOF
 
-#安装完成
-echo -e "\n------ install finished, you can visit your website now. ------\n"
+docker_ps=$(docker ps)
+
+if [[ "${docker_ps}" =~ 'nginx' ]]; then
+  success_print "nginx service ok\n"
+else
+  error_print "nginx service failed\n"
+fi
+
+if [[ "${docker_ps}" =~ 'php' ]]; then
+  success_print "php service ok\n"
+else
+  error_print "php service failed\n"
+fi
+
+if [[ "${docker_ps}" =~ 'mysql' ]]; then
+  success_print "mysql service ok\n"
+else
+  error_print "mysql service failed\n"
+fi
+
+if [[ "${docker_ps}" =~ 'redis' ]]; then
+  success_print "redis service ok\n"
+else
+  error_print "redis service failed\n"
+fi
+
+if [[ "${docker_ps}" =~ 'xunsearch' ]]; then
+  success_print "xunsearch service ok\n"
+else
+  error_print "xunsearch service failed\n"
+fi
