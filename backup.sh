@@ -1,21 +1,31 @@
 #!/usr/bin/env bash
 
-docker exec -i ctc-mysql bash <<'EOF'
+# ----------- 请根据实际情况，修改如下配置 ------------ #
 
-#数据库名称
-db_name=ctc
+#mysql项目数据库名称
+MYSQL_DATABASE=ctc
 
-#数据库用户
-db_user=ctc
+#mysql项目数据库用户
+MYSQL_USER=ctc
 
-#数据库密码
-db_pwd=1qaz2wsx3edc
-
-#备份目录(不要修改,末尾不带"/")
-backup_dir=/var/lib/mysql/backup
+#mysql项目数据库密码
+MYSQL_PASSWORD=1qaz2wsx3edc
 
 #备份保留天数
-backup_days=15
+KEEP_DAYS=15
+
+#本地目录(根据实际调整，绝对路径，末尾带"/")
+LOCAL_DIR=/home/root/ctc-docker/mysql/data/backup/
+
+#远程目录(根据实际调整，末尾带"/")
+REMOTE_DIR=/backup/database/
+
+# ------------ @@@ 以下内容，非专业人士请勿修改，新手请远离！ @@@ ------------- #
+
+docker exec -i ctc-mysql bash <<'EOF'
+
+#备份目录(末尾不带"/")
+backup_dir=/var/lib/mysql/backup
 
 #创建备份目录
 if [ ! -d ${backup_dir} ]; then
@@ -23,13 +33,13 @@ if [ ! -d ${backup_dir} ]; then
 fi
 
 #导出数据
-mysqldump --no-tablespaces -u ${db_user} -p${db_pwd} ${db_name} | gzip > ${backup_dir}/${db_name}-$(date +%Y-%m-%d).sql.gz
+mysqldump --no-tablespaces -u ${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_DATABASE} | gzip > ${backup_dir}/${MYSQL_DATABASE}-$(date +%Y-%m-%d).sql.gz
 
 #待删过期备份文件
-rm_filename=${backup_dir}/${db_name}-$(date -d -${backup_days}day +%Y-%m-%d).sql.gz
+rm_filename=${backup_dir}/${MYSQL_DATABASE}-$(date -d -${KEEP_DAYS}day +%Y-%m-%d).sql.gz
 
 #删除过期备份文件
-if [ `ls -l ${backup_dir} | grep sql.gz | wc -l` -gt ${backup_days} ]; then
+if [ `ls -l ${backup_dir} | grep sql.gz | wc -l` -gt ${KEEP_DAYS} ]; then
   if [ -e ${rm_filename} ]; then
     rm -f ${rm_filename}
   fi
@@ -38,11 +48,5 @@ fi
 exit
 EOF
 
-#本地目录(根据实际调整,末尾带"/")
-local_dir=/home/ubuntu/ctc-docker/mysql/data/backup/
-
-#远程目录(根据实际调整,末尾带"/")
-remote_dir=/backup/database/
-
 #同步备份
-coscmd upload -rs ${local_dir} ${remote_dir}
+coscmd upload -rs ${LOCAL_DIR} ${REMOTE_DIR}
