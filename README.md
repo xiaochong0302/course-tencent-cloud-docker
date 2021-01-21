@@ -4,7 +4,7 @@
 
 ### 安装指南
 
-下载 [安装脚本](https://gitee.com/koogua/course-tencent-cloud-docker/install.sh)
+下载安装脚本
 
 ```
 cd ~ && curl http://download.koogua.com/install.sh -o install.sh
