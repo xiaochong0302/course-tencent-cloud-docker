@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 
+# ----------- 请根据实际情况，修改如下配置 ------------ #
+
 #ctc目录
-CTC_DIR=~/ctc-docker/html/ctc
+CTC_DIR=/root/ctc-docker/html/ctc
+
+# ------------ @@@ 以下内容，非专业人士请勿修改，新手请远离！ @@@ ------------- #
 
 #更新源码
 cd ${CTC_DIR} && git pull

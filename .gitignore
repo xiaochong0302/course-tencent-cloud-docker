@@ -1,4 +1,8 @@
 /.idea
 /.env
 /html
+/backup.sh
+/install.sh
+/upgrade.sh
 /nginx/conf.d/default.conf
+/nginx/conf.d/ssl-default.conf

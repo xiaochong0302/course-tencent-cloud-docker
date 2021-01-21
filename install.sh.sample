@@ -58,7 +58,7 @@ if [ "$(os_type)" = 'ubuntu' ] || [ "$(os_type)" = 'debian' ]; then
 elif [ "$(os_type)" = 'centos' ]; then
   sudo yum update && yum install -y curl git
 else
-  error_print "\n------ sorry, we only support ubuntu,debian,centos currently. ------\n"
+  error_print "\n------ sorry, we only support ubuntu, debian, centos currently. ------\n"
   exit
 fi
 

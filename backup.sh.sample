@@ -14,10 +14,16 @@ MYSQL_PASSWORD=1qaz2wsx3edc
 #备份保留天数
 KEEP_DAYS=15
 
-#本地目录(根据实际调整，绝对路径，末尾带"/")
-LOCAL_DIR=/home/root/ctc-docker/mysql/data/backup/
+#COSCMD命令路径（绝对路径）
+COS_CMD=/usr/local/bin/coscmd
 
-#远程目录(根据实际调整，末尾带"/")
+#COS配置文件路径（绝对路径）
+COS_CONF_PATH=/root/.cos.conf
+
+#本地目录（绝对路径，末尾带"/"）
+LOCAL_DIR=/root/ctc-docker/mysql/data/backup/
+
+#远程目录（绝对路径，末尾带"/"）
 REMOTE_DIR=/backup/database/
 
 # ------------ @@@ 以下内容，非专业人士请勿修改，新手请远离！ @@@ ------------- #
@@ -49,4 +55,4 @@ exit
 EOF
 
 #同步备份
-coscmd upload -rs ${LOCAL_DIR} ${REMOTE_DIR}
+${COS_CMD} -c ${COS_CONF_PATH} upload -rs ${LOCAL_DIR} ${REMOTE_DIR}
