@@ -11,6 +11,7 @@ cd ~ && curl http://download.koogua.com/install.sh -o install.sh
 ```
 
 增加执行权限
+
 ```
 chmod +x install.sh
 ```

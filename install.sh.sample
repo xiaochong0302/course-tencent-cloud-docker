@@ -62,40 +62,6 @@ else
   exit
 fi
 
-#安装docker
-if [ -z "$(command -v docker)" ]; then
-  sudo curl -sSL https://get.daocloud.io/docker | sh
-fi
-
-if [ -z "$(command -v docker)" ]; then
-  error_print "\n------ error: docker command not found, please try again. ------\n"
-  exit
-fi
-
-if [ ! -d '/etc/docker' ]; then
-  mkdir -p '/etc/docker'
-fi
-
-#docker镜像加速
-if [ ! -e '/etc/docker/daemon.json' ]; then
-  sudo echo '{"registry-mirrors": ["https://mirror.ccs.tencentyun.com"]}' | tee /etc/docker/daemon.json
-fi
-
-#重启docker
-sudo systemctl daemon-reload
-sudo systemctl restart docker
-
-#安装docker-composer
-if [ -z "$(command -v docker-compose)" ]; then
-  sudo curl -L "https://get.daocloud.io/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-  sudo chmod +x /usr/local/bin/docker-compose
-fi
-
-if [ -z "$(command -v docker-compose)" ]; then
-  error_print "\n------ error: docker-compose command not found, please try again. ------\n"
-  exit
-fi
-
 #基准目录
 base_dir=~/ctc-docker
 
@@ -158,6 +124,40 @@ sed -i "s/\$config\['websocket'\]\['connect_address'\].*/\$config['websocket']['
 cp ${ctc_config_dir}/xs.course.default.ini ${ctc_config_dir}/xs.course.ini
 cp ${ctc_config_dir}/xs.group.default.ini ${ctc_config_dir}/xs.group.ini
 cp ${ctc_config_dir}/xs.user.default.ini ${ctc_config_dir}/xs.user.ini
+
+#安装docker
+if [ -z "$(command -v docker)" ]; then
+  sudo curl -sSL https://get.daocloud.io/docker | sh
+fi
+
+if [ -z "$(command -v docker)" ]; then
+  error_print "\n------ error: docker command not found, please try again. ------\n"
+  exit
+fi
+
+if [ ! -d '/etc/docker' ]; then
+  mkdir -p '/etc/docker'
+fi
+
+#docker镜像加速
+if [ ! -e '/etc/docker/daemon.json' ]; then
+  sudo echo '{"registry-mirrors": ["https://mirror.ccs.tencentyun.com"]}' | tee /etc/docker/daemon.json
+fi
+
+#重启docker
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+
+#安装docker-composer
+if [ -z "$(command -v docker-compose)" ]; then
+  sudo curl -L "https://get.daocloud.io/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+  sudo chmod +x /usr/local/bin/docker-compose
+fi
+
+if [ -z "$(command -v docker-compose)" ]; then
+  error_print "\n------ error: docker-compose command not found, please try again. ------\n"
+  exit
+fi
 
 #切换到基准目录
 cd ${base_dir} || exit
