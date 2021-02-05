@@ -231,6 +231,9 @@ rm -f storage/log/*.log
 exit
 EOF
 
+#重启php容器（websocket依赖WorkerGateway相关包，之前php容器启动时并未安装相关包）
+docker container restart ctc-php
+
 docker_ps=$(docker ps)
 
 if [[ "${docker_ps}" =~ 'nginx' ]]; then
