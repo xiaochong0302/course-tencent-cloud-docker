@@ -10,6 +10,13 @@ CTC_DIR=/root/ctc-docker/html/ctc
 #更新源码
 cd ${CTC_DIR} && git pull
 
+ctc_config_php=${CTC_DIR}/config/config.php
+
+static_version=$(date +%s)
+
+#更新静态资源版本号
+sed -i "s/\$config\['static_version'\].*/\$config['static_version'] = '${static_version}';/g" ${ctc_config_php}
+
 docker exec -i ctc-php bash <<'EOF'
 
 #切换到ctc目录

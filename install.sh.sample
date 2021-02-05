@@ -225,6 +225,9 @@ php console.php course_index rebuild
 php console.php group_index rebuild
 php console.php user_index rebuild
 
+#清理log（之前步骤以root身份产生日志会让www-data用户无写入权限）
+rm -f storage/log/*.log
+
 exit
 EOF
 
