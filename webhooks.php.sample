@@ -1,6 +1,6 @@
 <?php
 
-$ctcDir = '/root/ctc-docker/html/ctc';
+$baseDir = '/root/ctc-docker';
 
 $secret = '1qaz2wsx3edc';
 
@@ -31,7 +31,7 @@ if ($payload['sign'] != $mySign) {
 
 if ($payload['ref'] == "refs/heads/{$branch}" && $payload['total_commits_count'] > 0) {
 
-    $result = shell_exec("bash {$ctcDir}/upgrade.sh");
+    $result = shell_exec("bash {$baseDir}/upgrade.sh");
 
     echo $result;
 }
