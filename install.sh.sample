@@ -145,6 +145,7 @@ if [ ! -e '/etc/docker/daemon.json' ]; then
 fi
 
 #重启docker
+sudo chmod 666 /var/run/docker.sock
 sudo systemctl daemon-reload
 sudo systemctl restart docker
 
