@@ -145,9 +145,9 @@ if [ ! -e '/etc/docker/daemon.json' ]; then
 fi
 
 #重启docker
-sudo chmod 666 /var/run/docker.sock
 sudo systemctl daemon-reload
 sudo systemctl restart docker
+sudo chmod 666 /var/run/docker.sock
 
 #安装docker-composer
 if [ -z "$(command -v docker-compose)" ]; then
