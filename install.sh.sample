@@ -172,23 +172,23 @@ docker-compose up -d
 #导入测试数据
 if [ ${SITE_DEMO} = 'on' ]; then
 
-  docker exec -i ctc-mysql bash <<'EOF'
+  demo_sql=${base_dir}/mysql/data/ctc-demo.sql.gz
 
   echo -e "\n------ start import demo data ------\n"
 
-  #安装curl
-  apt-get update && apt-get install -y curl
+  curl http://download.koogua.com/ctc-demo.sql.gz -o ${demo_sql}
 
-  #下载数据
-  cd ~ && curl http://download.koogua.com/ctc-demo.sql.gz -o ctc-demo.sql.gz
+  docker exec -i ctc-mysql bash <<'EOF'
 
-  #导入数据
-  gunzip < ctc-demo.sql.gz | mysql -u ${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_DATABASE}
-
-  echo -e "\n------ finish import demo data ------\n"
+  gunzip < /var/lib/mysql/ctc-demo.sql.gz | mysql -u ${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_DATABASE}
 
   exit
+
 EOF
+
+  rm -f ${demo_sql}
+
+  echo -e "\n------ finish import demo data ------\n"
 
 fi
 
