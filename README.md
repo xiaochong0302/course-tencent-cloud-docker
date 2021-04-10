@@ -53,12 +53,12 @@ REDIS_PASSWORD=1qaz2wsx3edc
 执行安装，快慢取决于网络，当有错误或者超时请重试
 
 ```
-bash install.sh
+sudo bash install.sh
 ```
 
 ### 访问网站
 
-* 管理帐号：10000@163.com / 123456
+* 管理账号：10000@163.com / 123456
 * 前台地址：http://{your-domain}.com
 * 后台地址：http://{your-domain}.com/admin
 
@@ -66,7 +66,7 @@ bash install.sh
    
 ### 测试数据
 
-管理帐号：100015@163.com / 123456
+管理账号：100015@163.com / 123456
 
 ### 结束安装
 

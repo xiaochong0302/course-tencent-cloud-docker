@@ -26,7 +26,7 @@ MYSQL_PASSWORD=1qaz2wsx3edc
 #redis访问密码（数字字母组合，不要用特殊字符）
 REDIS_PASSWORD=1qaz2wsx3edc
 
-# ------------ @@@ 以下内容，非专业人士请勿修改，新手请远离！ @@@ ------------- #
+# ------------ @@@ 以下内容，非专业人士请勿修改！ @@@ ------------- #
 
 #成功信息输出
 success_print() {
@@ -122,12 +122,14 @@ sed -i "s/\$config\['websocket'\]\['connect_address'\].*/\$config['websocket']['
 
 #复制xunsearch配置文件
 cp ${ctc_config_dir}/xs.course.default.ini ${ctc_config_dir}/xs.course.ini
+cp ${ctc_config_dir}/xs.article.default.ini ${ctc_config_dir}/xs.article.ini
 cp ${ctc_config_dir}/xs.group.default.ini ${ctc_config_dir}/xs.group.ini
 cp ${ctc_config_dir}/xs.user.default.ini ${ctc_config_dir}/xs.user.ini
 
 #安装docker
 if [ -z "$(command -v docker)" ]; then
   sudo curl -sSL https://get.daocloud.io/docker | sh
+  sudo systemctl enable docker
 fi
 
 if [ -z "$(command -v docker)" ]; then
@@ -136,7 +138,7 @@ if [ -z "$(command -v docker)" ]; then
 fi
 
 if [ ! -d '/etc/docker' ]; then
-  mkdir -p '/etc/docker'
+  sudo mkdir -p '/etc/docker'
 fi
 
 #docker镜像加速
@@ -163,7 +165,7 @@ fi
 #切换到基准目录
 cd ${base_dir} || exit
 
-#构建镜像
+#启动容器
 docker-compose build
 
 #启动容器
@@ -197,7 +199,7 @@ docker exec -i ctc-php bash <<'EOF'
 ctc_dir=/var/www/html/ctc
 
 #修改storage目录权限
-chmod -R 777 ${ctc_dir}/storage
+chmod -R www-data:www-data ${ctc_dir}/storage
 
 tmp_sitemap_xml=${ctc_dir}/storage/tmp/sitemap.xml
 public_sitemap_xml=${ctc_dir}/public/sitemap.xml
@@ -223,6 +225,7 @@ php console.php upgrade
 
 #重建xunsearch索引
 php console.php course_index rebuild
+php console.php article_index rebuild
 php console.php group_index rebuild
 php console.php user_index rebuild
 
@@ -233,7 +236,7 @@ exit
 EOF
 
 #重启php容器（websocket依赖WorkerGateway相关包，之前php容器启动时并未安装相关包）
-docker container restart ctc-php
+docker restart ctc-php
 
 docker_ps=$(docker ps)
 
