@@ -53,7 +53,7 @@ REDIS_PASSWORD=1qaz2wsx3edc
 执行安装，快慢取决于网络，当有错误或者超时请重试
 
 ```
-sudo bash install.sh
+bash install.sh
 ```
 
 ### 访问网站
