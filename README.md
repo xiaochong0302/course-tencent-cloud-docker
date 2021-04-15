@@ -22,35 +22,7 @@ chmod +x install.sh
 nano install.sh
 ```
 
-可选配置项目如下：
-
-```
-#是否安装测试数据(on:是，off:否)
-SITE_DEMO=off
-
-#站点域名(不包括http)
-SITE_DOMAIN=abc.com
-
-#站点密钥(数字字母组合，不要用特殊字符)
-SITE_KEY=1qaz2wsx3edc
-
-#mysql超级用户密码（数字字母组合，不要用特殊字符）
-MYSQL_ROOT_PASSWORD=1qaz2wsx3edc
-
-#mysql项目数据库名称（数字字母组合，不要用特殊字符）
-MYSQL_DATABASE=ctc
-
-#mysql项目数据库用户（数字字母组合，不要用特殊字符）
-MYSQL_USER=ctc
-
-#mysql项目数据库密码（数字字母组合，不要用特殊字符）
-MYSQL_PASSWORD=1qaz2wsx3edc
-
-#redis访问密码（数字字母组合，不要用特殊字符）
-REDIS_PASSWORD=1qaz2wsx3edc
-```
-
-执行安装，快慢取决于网络，当有错误或者超时请重试
+执行安装，快慢取决于网络，当有错误或者超时请再次重试安装
 
 ```
 bash install.sh
