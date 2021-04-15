@@ -14,6 +14,12 @@ SITE_KEY=1qaz2wsx3edc
 #mysql超级用户密码（数字字母组合，不要用特殊字符）
 MYSQL_ROOT_PASSWORD=1qaz2wsx3edc
 
+#mysql主机名称（非独立实例请不要修改，独立实例填写主机IP）
+MYSQL_HOST=mysql
+
+#mysql主机端口（非独立实例请不要修改）
+MYSQL_PORT=3306
+
 #mysql项目数据库名称（数字字母组合，不要用特殊字符）
 MYSQL_DATABASE=ctc
 
@@ -23,10 +29,13 @@ MYSQL_USER=ctc
 #mysql项目数据库密码（数字字母组合，不要用特殊字符）
 MYSQL_PASSWORD=1qaz2wsx3edc
 
+#redis主机名称（非独立实例请不要修改，独立实例填写主机IP）
+REDIS_HOST=redis
+
 #redis访问密码（数字字母组合，不要用特殊字符）
 REDIS_PASSWORD=1qaz2wsx3edc
 
-# ------------ @@@ 以下内容，非专业人士请勿修改！ @@@ ------------- #
+# ------------ @@@ 以下内容，非专业人士请勿修改，新手请远离！ @@@ ------------- #
 
 #成功信息输出
 success_print() {
@@ -114,9 +123,12 @@ cp ${ctc_config_dir}/config.default.php ${ctc_config_php}
 
 #替换config.php配置项
 sed -i "s/\$config\['key'\].*/\$config['key'] = '${SITE_KEY}';/g" ${ctc_config_php}
+sed -i "s/\$config\['db'\]\['host'\].*/\$config['db']['host'] = '${MYSQL_HOST}';/g" ${ctc_config_php}
+sed -i "s/\$config\['db'\]\['port'\].*/\$config['db']['port'] = '${MYSQL_PORT}';/g" ${ctc_config_php}
 sed -i "s/\$config\['db'\]\['dbname'\].*/\$config['db']['dbname'] = '${MYSQL_DATABASE}';/g" ${ctc_config_php}
 sed -i "s/\$config\['db'\]\['username'\].*/\$config['db']['username'] = '${MYSQL_USER}';/g" ${ctc_config_php}
 sed -i "s/\$config\['db'\]\['password'\].*/\$config['db']['password'] = '${MYSQL_PASSWORD}';/g" ${ctc_config_php}
+sed -i "s/\$config\['redis'\]\['host'\].*/\$config['redis']['host'] = '${REDIS_HOST}';/g" ${ctc_config_php}
 sed -i "s/\$config\['redis'\]\['auth'\].*/\$config['redis']['auth'] = '${REDIS_PASSWORD}';/g" ${ctc_config_php}
 sed -i "s/\$config\['websocket'\]\['connect_address'\].*/\$config['websocket']['connect_address'] = 'http:\/\/${SITE_DOMAIN}:8282';/g" ${ctc_config_php}
 
@@ -144,12 +156,10 @@ fi
 #docker镜像加速
 if [ ! -e '/etc/docker/daemon.json' ]; then
   sudo echo '{"registry-mirrors": ["https://mirror.ccs.tencentyun.com"]}' | tee /etc/docker/daemon.json
+  sudo systemctl daemon-reload
+  sudo systemctl restart docker
+  sudo chmod 666 /var/run/docker.sock
 fi
-
-#重启docker
-sudo systemctl daemon-reload
-sudo systemctl restart docker
-sudo chmod 666 /var/run/docker.sock
 
 #安装docker-composer
 if [ -z "$(command -v docker-compose)" ]; then
@@ -165,7 +175,7 @@ fi
 #切换到基准目录
 cd ${base_dir} || exit
 
-#启动容器
+#构建镜像
 docker-compose build
 
 #启动容器
@@ -199,7 +209,7 @@ docker exec -i ctc-php bash <<'EOF'
 ctc_dir=/var/www/html/ctc
 
 #修改storage目录权限
-chmod -R www-data:www-data ${ctc_dir}/storage
+chown -R www-data:www-data ${ctc_dir}/storage
 
 tmp_sitemap_xml=${ctc_dir}/storage/tmp/sitemap.xml
 public_sitemap_xml=${ctc_dir}/public/sitemap.xml
@@ -235,8 +245,8 @@ rm -f storage/log/*.log
 exit
 EOF
 
-#重启php容器（websocket依赖WorkerGateway相关包，之前php容器启动时并未安装相关包）
-docker restart ctc-php
+#重启php容器（websocket依赖WorkerGateway相关包，之前启动php容器时并未安装相关包）
+docker container restart ctc-php
 
 docker_ps=$(docker ps)
 
