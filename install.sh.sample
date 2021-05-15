@@ -135,6 +135,7 @@ sed -i "s/\$config\['websocket'\]\['connect_address'\].*/\$config['websocket']['
 #复制xunsearch配置文件
 cp ${ctc_config_dir}/xs.course.default.ini ${ctc_config_dir}/xs.course.ini
 cp ${ctc_config_dir}/xs.article.default.ini ${ctc_config_dir}/xs.article.ini
+cp ${ctc_config_dir}/xs.question.default.ini ${ctc_config_dir}/xs.question.ini
 cp ${ctc_config_dir}/xs.group.default.ini ${ctc_config_dir}/xs.group.ini
 cp ${ctc_config_dir}/xs.user.default.ini ${ctc_config_dir}/xs.user.ini
 
@@ -236,6 +237,7 @@ php console.php upgrade
 #重建xunsearch索引
 php console.php course_index rebuild
 php console.php article_index rebuild
+php console.php question_index rebuild
 php console.php group_index rebuild
 php console.php user_index rebuild
 

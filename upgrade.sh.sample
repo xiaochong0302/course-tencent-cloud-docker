@@ -1,21 +1,33 @@
 #!/usr/bin/env bash
 
-# ----------- 请根据实际情况，修改如下配置 ------------ #
-
 #ctc目录
-CTC_DIR=/root/ctc-docker/html/ctc
+CTC_DIR=$(pwd)/html/ctc
 
-# ------------ @@@ 以下内容，非专业人士请勿修改，新手请远离！ @@@ ------------- #
-
-#更新源码
-cd ${CTC_DIR} && git pull
-
+#config.php
 ctc_config_php=${CTC_DIR}/config/config.php
 
+#静态文件版本号
 static_version=$(date +%s)
 
+#成功信息输出
+success_print() {
+  echo -e "\033[32m $1 \033[0m"
+}
+
+#失败信息输出
+error_print() {
+  echo -e "\033[31m $1 \033[0m"
+}
+
+if [ ! -d "${CTC_DIR}" ]; then
+  error_print "\n------ ctc dir not existed ------\n"
+fi
+
+#更新源码
+cd "${CTC_DIR}" && git pull
+
 #更新静态资源版本号
-sed -i "s/\$config\['static_version'\].*/\$config['static_version'] = '${static_version}';/g" ${ctc_config_php}
+sed -i "s/\$config\['static_version'\].*/\$config['static_version'] = '${static_version}';/g" "${ctc_config_php}"
 
 docker exec -i ctc-php bash <<'EOF'
 
@@ -35,4 +47,4 @@ php console.php upgrade
 exit
 EOF
 
-echo -e "\n------ upgrade finished -------\n"
+success_print "\n------ upgrade finished -------\n"
