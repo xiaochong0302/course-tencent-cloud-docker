@@ -23,8 +23,14 @@ if [ ! -d "${CTC_DIR}" ]; then
   error_print "\n------ ctc dir not existed ------\n"
 fi
 
-#更新源码
-cd "${CTC_DIR}" && git pull
+#拉取源码
+pull_result=$(cd "${CTC_DIR}" && git pull)
+
+#判断更新
+if [[ ${pull_result} =~ 'Already up to date' ]]; then
+  success_print "\n------ Already up to date ------\n"
+  exit
+fi
 
 #更新静态资源版本号
 sed -i "s/\$config\['static_version'\].*/\$config['static_version'] = '${static_version}';/g" "${ctc_config_php}"
