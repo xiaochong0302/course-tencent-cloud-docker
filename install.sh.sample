@@ -37,6 +37,12 @@ REDIS_PASSWORD=1qaz2wsx3edc
 
 # ------------ @@@ 以下内容，非专业人士请勿修改，新手请远离！ @@@ ------------- #
 
+#基准目录
+base_dir=~/ctc-docker
+
+#ctc目录
+ctc_dir=${base_dir}/html/ctc
+
 #成功信息输出
 success_print() {
   echo -e "\033[32m $1 \033[0m"
@@ -77,11 +83,6 @@ else
   exit
 fi
 
-#基准目录
-base_dir=~/ctc-docker
-
-#ctc目录
-ctc_dir=${base_dir}/html/ctc
 
 #克隆ctc-docker项目
 if [ ! -d ${base_dir} ]; then
