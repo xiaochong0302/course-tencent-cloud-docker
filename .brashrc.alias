@@ -1,0 +1,26 @@
+alias dnginx="docker exec -it xh-nginx /bin/bash"
+alias dphp="docker exec -it --user www-data:www-data xh-php /bin/bash"
+alias dmysql="docker exec -it xh-mysql /bin/bash"
+alias dredis="docker exec -it xh-redis /bin/bash"
+
+
+php() {
+    docker run \
+        -it \
+        --rm \
+        --volume $PWD:/www:rw \
+        --user www-data:www-data \
+        --workdir /www \
+        xh_php php "$@"
+}
+
+
+composer () {
+    docker run \
+        -it \
+        --rm \
+        --user www-data:www-data \
+        --volume $(pwd):/app \
+        --workdir /app \
+        xh_php composer "$@"
+}
