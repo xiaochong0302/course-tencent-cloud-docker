@@ -61,6 +61,12 @@ os_type() {
   fi
 }
 
+# 判断是否 root 用户，如果不是root用户，则中断运行
+if [[ $EUID -ne 0 ]]; then
+    error_print "Error:This script must be run as root!" 1>&2
+    exit 1
+fi
+
 #安装git和curl
 if [ "$(os_type)" = 'ubuntu' ] || [ "$(os_type)" = 'debian' ]; then
   sudo apt-get update && apt-get install -y curl git
@@ -182,6 +188,36 @@ docker-compose build
 #启动容器
 docker-compose up -d
 
+
+docker exec -i ctc-php bash <<'EOF'
+ctc_dir=/var/www/html/ctc
+
+tmp_sitemap_xml=${ctc_dir}/storage/tmp/sitemap.xml
+public_sitemap_xml=${ctc_dir}/public/sitemap.xml
+
+# 创建并连接sitemap.xml
+if [ ! -e ${tmp_sitemap_xml} ]; then
+  touch ${tmp_sitemap_xml}
+fi
+
+# 覆盖 软连接，避免错误的软连接
+ln -sf ${tmp_sitemap_xml} ${public_sitemap_xml}
+
+# 统一 ctc 目录权限
+chown -R www-data:www-data ${ctc_dir}
+
+#
+# 判断mysql容器是否已经启动成功
+#
+until nc -z -v -w30 mysql 3306 &> /dev/null
+do
+  echo "Waiting for database connection..."
+  sleep 1
+done
+
+exit
+EOF
+
 #导入测试数据
 if [ ${SITE_DEMO} = 'on' ]; then
 
@@ -205,21 +241,10 @@ EOF
 
 fi
 
-docker exec -i ctc-php bash <<'EOF'
+# 使用 www-data 用户运行，避免权限问题
+docker exec -i --user www-data:www-data ctc-php bash <<'EOF'
 
 ctc_dir=/var/www/html/ctc
-
-#修改storage目录权限
-chown -R www-data:www-data ${ctc_dir}/storage
-
-tmp_sitemap_xml=${ctc_dir}/storage/tmp/sitemap.xml
-public_sitemap_xml=${ctc_dir}/public/sitemap.xml
-
-#创建并连接sitemap.xml
-if [ ! -e ${tmp_sitemap_xml} ]; then
-  touch ${tmp_sitemap_xml}
-  ln -s ${tmp_sitemap_xml} ${public_sitemap_xml}
-fi
 
 #切换到ctc目录
 cd ${ctc_dir}
