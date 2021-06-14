@@ -1,4 +1,4 @@
-FROM xiaochong0302/php:latest
+FROM xiaochong0302/php:ctc
 
 # 修正 www-data 在 /var/www 目录下无法读写 .composer 的问题
 RUN mkdir -p /var/www && \

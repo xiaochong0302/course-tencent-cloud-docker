@@ -1,0 +1,4 @@
+alias docker_nginx="docker exec -it ctc-nginx /bin/bash"
+alias docker_php="docker exec -it --user www-data:www-data ctc-php /bin/bash"
+alias docker_mysql="docker exec -it ctc-mysql /bin/bash"
+alias docker_redis="docker exec -it ctc-redis /bin/bash"

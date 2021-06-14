@@ -67,7 +67,7 @@ os_type() {
   fi
 }
 
-# 判断是否 root 用户，如果不是root用户，则中断运行
+# 判断是否root用户
 if [[ $EUID -ne 0 ]]; then
     error_print "Error:This script must be run as root!" 1>&2
     exit 1
@@ -82,7 +82,6 @@ else
   error_print "\n------ sorry, we only support ubuntu, debian, centos currently. ------\n"
   exit
 fi
-
 
 #克隆ctc-docker项目
 if [ ! -d ${base_dir} ]; then
@@ -118,7 +117,7 @@ nginx_default_conf=${nginx_conf_dir}/default.conf
 #复制nginx站点配置文件
 cp ${nginx_conf_dir}/default.conf.sample ${nginx_default_conf}
 
-#替换nginx　default.conf配置项
+#替换nginx default.conf配置项
 sed -i "s/server_name .*/server_name ${SITE_DOMAIN};/g" ${nginx_default_conf}
 
 #ctc config目录
@@ -189,10 +188,9 @@ docker-compose build
 #启动容器
 docker-compose up -d
 
-
 docker exec -i ctc-php bash <<'EOF'
-ctc_dir=/var/www/html/ctc
 
+ctc_dir=/var/www/html/ctc
 tmp_sitemap_xml=${ctc_dir}/storage/tmp/sitemap.xml
 public_sitemap_xml=${ctc_dir}/public/sitemap.xml
 
@@ -201,18 +199,16 @@ if [ ! -e ${tmp_sitemap_xml} ]; then
   touch ${tmp_sitemap_xml}
 fi
 
-# 覆盖 软连接，避免错误的软连接
+# 覆盖软连接，避免错误的软连接
 ln -sf ${tmp_sitemap_xml} ${public_sitemap_xml}
 
-# 统一 ctc 目录权限
+# 统一ctc目录权限
 chown -R www-data:www-data ${ctc_dir}
 
-#
 # 判断mysql容器是否已经启动成功
-#
 until nc -z -v -w30 mysql 3306 &> /dev/null
 do
-  echo "Waiting for database connection..."
+  echo "waiting for database connection..."
   sleep 1
 done
 
@@ -242,7 +238,7 @@ EOF
 
 fi
 
-# 使用 www-data 用户运行，避免权限问题
+# 使用www-data用户运行，避免权限问题
 docker exec -i --user www-data:www-data ctc-php bash <<'EOF'
 
 ctc_dir=/var/www/html/ctc
