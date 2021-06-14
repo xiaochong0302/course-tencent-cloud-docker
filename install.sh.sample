@@ -69,8 +69,8 @@ os_type() {
 
 # 判断是否root用户
 if [[ $EUID -ne 0 ]]; then
-    error_print "Error:This script must be run as root!" 1>&2
-    exit 1
+  error_print "Error:This script must be run as root!" 1>&2
+  exit 1
 fi
 
 #安装git和curl
