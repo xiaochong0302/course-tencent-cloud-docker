@@ -11,9 +11,9 @@ services:
       - 443:443
     volumes:
       - ./html:/var/www/html
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/nginx/ssl
       - ./nginx/log:/var/log/nginx
     networks:
       - koogua
@@ -30,8 +30,8 @@ services:
     volumes:
       - ./html:/var/www/html
       - ./php/log:/var/log/php-fpm
-      - ./php/conf.d/php.ini:/usr/local/etc/php/conf.d/php.ini:ro
-      - ./php/supervisor/conf.d:/etc/supervisor/conf.d:ro
+      - ./php/conf.d/php.ini:/usr/local/etc/php/conf.d/php.ini
+      - ./php/supervisor/conf.d:/etc/supervisor/conf.d
     command: ["supervisord", "-n"]
     networks:
       - koogua
@@ -44,7 +44,7 @@ services:
     expose:
       - 3306
     volumes:
-      - ./mysql/conf.d/my.cnf:/etc/mysql/conf.d/my.cnf:ro
+      - ./mysql/conf.d/my.cnf:/etc/mysql/conf.d/my.cnf
       - ./mysql/data:/var/lib/mysql
       - ./mysql/log:/var/log/mysql
     environment:
@@ -63,7 +63,7 @@ services:
     expose:
       - 6379
     volumes:
-      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
       - ./redis/data:/data
     command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
     networks:
