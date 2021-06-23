@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #ctc目录
-CTC_DIR=$(pwd)/html/ctc
+CTC_DIR=/root/ctc-docker/html/ctc
 
 #config.php
 ctc_config_php=${CTC_DIR}/config/config.php
