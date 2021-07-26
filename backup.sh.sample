@@ -1,15 +1,7 @@
 #!/usr/bin/env bash
 
-# ----------- 请根据实际情况，修改如下配置 ------------ #
-
-#mysql项目数据库名称
-MYSQL_DATABASE=ctc
-
-#mysql项目数据库用户
-MYSQL_USER=ctc
-
-#mysql项目数据库密码
-MYSQL_PASSWORD=1qaz2wsx3edc
+#数据库名称
+DB_NAME=ctc
 
 #备份保留天数
 KEEP_DAYS=15
@@ -26,9 +18,16 @@ LOCAL_DIR=/root/ctc-docker/mysql/data/backup
 #远程目录（绝对路径，末尾不带"/"）
 REMOTE_DIR=/backup/database
 
-# ------------ @@@ 以下内容，非专业人士请勿修改！@@@ ------------- #
-
 docker exec -i ctc-mysql bash <<'EOF'
+
+#数据库名称
+DB_NAME=ctc
+
+#数据库用户
+DB_USER=ctc
+
+#数据库密码
+DB_PWD=1qaz2wsx3edc
 
 #备份目录(末尾不带"/")
 backup_dir=/var/lib/mysql/backup
@@ -39,17 +38,19 @@ if [ ! -d ${backup_dir} ]; then
 fi
 
 #导出数据
-mysqldump --no-tablespaces -u ${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_DATABASE} | gzip > ${backup_dir}/${MYSQL_DATABASE}-$(date +%Y-%m-%d).sql.gz
+mysqldump --no-tablespaces -u ${DB_USER} -p${DB_PWD} ${DB_NAME} | gzip > ${backup_dir}/${DB_NAME}-$(date +%Y-%m-%d).sql.gz
 
 exit
 EOF
 
 #待删过期备份文件
-rm_filename=${LOCAL_DIR}/${MYSQL_DATABASE}-$(date -d -${KEEP_DAYS}day +%Y-%m-%d).sql.gz
+rm_filename=${LOCAL_DIR}/${DB_NAME}-$(date -d -${KEEP_DAYS}day +%Y-%m-%d).sql.gz
 
 #删除过期备份文件
-if [ "$(find ${LOCAL_DIR}/*.sql.gz | wc -l)" -gt ${KEEP_DAYS} ]; then
-  rm -f "${rm_filename}"
+if [ "$(find ${LOCAL_DIR}/${DB_NAME}-*.sql.gz | wc -l)" -gt ${KEEP_DAYS} ]; then
+  if [ -f "${rm_filename}" ]; then
+    rm -f "${rm_filename}"
+  fi
 fi
 
 #同步备份

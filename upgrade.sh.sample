@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
+#docker目录
+DOCKER_DIR=/root/ctc-docker
+
 #ctc目录
-CTC_DIR=/root/ctc-docker/html/ctc
+CTC_DIR=${DOCKER_DIR}/html/ctc
 
 #config.php
 ctc_config_php=${CTC_DIR}/config/config.php
@@ -23,7 +26,10 @@ if [ ! -d "${CTC_DIR}" ]; then
   error_print "\n------ ctc dir not existed ------\n"
 fi
 
-#拉取源码
+#拉取docker更新
+cd ${CTC_DIR} && git pull
+
+#拉取ctc源码更新
 pull_result=$(cd "${CTC_DIR}" && git pull)
 
 #判断更新
