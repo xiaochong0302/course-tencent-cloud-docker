@@ -3,11 +3,14 @@
 #基准目录
 base_dir=~
 
+#站点名称
+site_name=ctc-docker
+
 #ctc-docker目录
-ctc_docker_dir=${base_dir}/ctc-docker
+ctc_docker_dir=${base_dir}/${site_name}
 
 #ctc-docker备份文件
-ctc_docker_tar=${base_dir}/ctc-docker.tar.gz
+ctc_docker_tar=${base_dir}/${site_name}.tar.gz
 
 #成功信息输出
 success_print() {
@@ -55,7 +58,7 @@ if [ ! -e ${ctc_docker_tar} ]; then
 fi
 
 #解压ctc-docker.tar.gz
-cd ${base_dir} && tar -xzf ${ctc_docker_tar}
+cd ${base_dir} && tar -xzf ${site_name}.tar.gz
 
 #安装docker
 if [ -z "$(command -v docker)" ]; then
