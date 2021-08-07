@@ -53,6 +53,9 @@ cd ${ctc_docker_dir} && docker-compose down
 #压缩文件
 cd ${base_dir} && tar -czf ${site_name}.tar.gz ${site_name}
 
+#重启容器
+cd ${ctc_docker_dir} && docker-compose up -d
+
 if [ -e ${ctc_docker_tar} ]; then
   success_print "\n------ backup completed ------\n"
 fi
