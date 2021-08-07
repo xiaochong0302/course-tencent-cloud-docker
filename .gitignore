@@ -4,5 +4,7 @@
 /backup.sh
 /install.sh
 /upgrade.sh
+/site_backup.sh
+/site_restore.sh
 /nginx/conf.d/default.conf
 /nginx/conf.d/ssl-default.conf

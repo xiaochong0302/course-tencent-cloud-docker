@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+
+#基准目录
+base_dir=~
+
+#站点名称
+site_name=ctc-docker
+
+#ctc-docker目录
+ctc_docker_dir=${base_dir}/${site_name}
+
+#ctc-docker备份文件
+ctc_docker_tar=${base_dir}/${site_name}.tar.gz
+
+#成功信息输出
+success_print() {
+  echo -e "\033[32m $1 \033[0m"
+}
+
+#失败信息输出
+error_print() {
+  echo -e "\033[31m $1 \033[0m"
+}
+
+#系统判断
+os_type() {
+  os=$(grep "^ID=" /etc/os-release)
+  if [[ ${os} =~ 'centos' ]]; then
+    echo 'centos'
+  elif [[ ${os} =~ 'ubuntu' ]]; then
+    echo 'ubuntu'
+  elif [[ ${os} =~ 'debian' ]]; then
+    echo 'debian'
+  else
+    echo 'other'
+  fi
+}
+
+#判断是否root用户
+if [[ $EUID -ne 0 ]]; then
+    error_print "\n------ error: this script must be run as root ------\n" 1>&2
+    exit 1
+fi
+
+if [ ! -d ${ctc_docker_dir} ]; then
+  error_print "\n------ error: ctc-docker dir not found ------\n"
+  exit 1
+fi
+
+#停止容器
+cd ${ctc_docker_dir} && docker-compose down
+
+#压缩文件
+cd ${base_dir} && tar -czf ${site_name}.tar.gz ${site_name}
+
+if [ -e ${ctc_docker_tar} ]; then
+  success_print "\n------ backup completed ------\n"
+fi
