@@ -27,10 +27,10 @@ if [ ! -d "${CTC_DIR}" ]; then
 fi
 
 #拉取docker更新
-cd ${CTC_DIR} && git pull
+cd ${CTC_DIR} && git pull --no-rebase
 
 #拉取ctc源码更新
-pull_result=$(cd "${CTC_DIR}" && git pull)
+pull_result=$(cd "${CTC_DIR}" && git pull --no-rebase)
 
 #判断更新
 if [[ ${pull_result} =~ 'Already up to date' ]]; then
