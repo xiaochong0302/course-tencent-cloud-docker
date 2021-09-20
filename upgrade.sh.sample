@@ -32,12 +32,6 @@ cd ${DOCKER_DIR} && git pull --no-rebase
 #拉取ctc源码更新
 pull_result=$(cd "${CTC_DIR}" && git pull --no-rebase)
 
-#判断更新
-if [[ ${pull_result} =~ 'Already up to date' ]]; then
-  success_print "\n------ Already up to date ------\n"
-  exit
-fi
-
 #更新静态资源版本号
 sed -i "s/\$config\['static_version'\].*/\$config['static_version'] = '${static_version}';/g" "${ctc_config_php}"
 
