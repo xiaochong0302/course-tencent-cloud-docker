@@ -7,7 +7,7 @@
 下载安装脚本
 
 ```
-cd ~ && curl http://download.koogua.com/install.sh -o install.sh
+cd ~ && curl http://download.koogua.com/ctc/install.sh -o install.sh
 ```
 
 增加执行权限
@@ -34,7 +34,8 @@ bash install.sh
 * 前台地址：http://{your-domain}.com
 * 后台地址：http://{your-domain}.com/admin
 
-后续设置： [系统设置](https://gitee.com/koogua/course-tencent-cloud/wikis) 
+后续设置： [系统设置](https://koogua.com/page/wiki)
+
    
 ### 测试数据
 
