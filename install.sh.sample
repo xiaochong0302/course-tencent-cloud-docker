@@ -69,7 +69,7 @@ os_type() {
 
 #判断是否root用户
 if [[ $EUID -ne 0 ]]; then
-  error_print "Error:This script must be run as root!" 1>&2
+  error_print "\n------ this script must be run as root ------\n"
   exit 1
 fi
 
@@ -218,15 +218,15 @@ EOF
 #导入测试数据
 if [ ${SITE_DEMO} = 'on' ]; then
 
-  demo_sql=${base_dir}/mysql/data/ctc-demo.sql.gz
+  demo_sql=${base_dir}/mysql/data/demo.sql.gz
 
   echo -e "\n------ start import demo data ------\n"
 
-  curl http://download.koogua.com/ctc-demo.sql.gz -o ${demo_sql}
+  curl http://download.koogua.com/ctc/demo.sql.gz -o ${demo_sql}
 
   docker exec -i ctc-mysql bash <<'EOF'
 
-  gunzip < /var/lib/mysql/ctc-demo.sql.gz | mysql -u ${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_DATABASE}
+  gunzip < /var/lib/mysql/demo.sql.gz | mysql -u ${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_DATABASE}
 
   exit
 
