@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-#数据库名称
-DB_NAME=ctc
-
 #备份保留天数
 KEEP_DAYS=15
 
@@ -43,15 +40,8 @@ mysqldump --no-tablespaces -u ${DB_USER} -p${DB_PWD} ${DB_NAME} | gzip > ${backu
 exit
 EOF
 
-#待删过期备份文件
-rm_filename=${LOCAL_DIR}/${DB_NAME}-$(date -d -${KEEP_DAYS}day +%Y-%m-%d).sql.gz
-
-#删除过期备份文件
-if [ "$(find ${LOCAL_DIR}/${DB_NAME}-*.sql.gz | wc -l)" -gt ${KEEP_DAYS} ]; then
-  if [ -f "${rm_filename}" ]; then
-    rm -f "${rm_filename}"
-  fi
-fi
+#删除过期备份
+find ${LOCAL_DIR} -mtime +${KEEP_DAYS} -name "*.sql.gz" | xargs rm -f
 
 #同步备份
 echo y | ${COS_CMD} -c ${COS_CONF_PATH} upload -rs --delete ${LOCAL_DIR}/ ${REMOTE_DIR}/

@@ -222,7 +222,7 @@ if [ ${SITE_DEMO} = 'on' ]; then
 
   echo -e "\n------ start import demo data ------\n"
 
-  curl http://download.koogua.com/ctc/demo.sql.gz -o ${demo_sql}
+  curl https://download.koogua.com/ctc/demo.sql.gz -o ${demo_sql}
 
   docker exec -i ctc-mysql bash <<'EOF'
 
