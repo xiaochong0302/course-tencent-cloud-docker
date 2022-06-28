@@ -26,7 +26,7 @@ DB_USER=ctc
 #数据库密码
 DB_PWD=1qaz2wsx3edc
 
-#备份目录(末尾不带"/")
+#备份目录（末尾不带"/"）
 backup_dir=/var/lib/mysql/backup
 
 #创建备份目录

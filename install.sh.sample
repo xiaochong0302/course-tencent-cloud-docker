@@ -136,7 +136,7 @@ sed -i "s/\$config\['db'\]\['username'\].*/\$config['db']['username'] = '${MYSQL
 sed -i "s/\$config\['db'\]\['password'\].*/\$config['db']['password'] = '${MYSQL_PASSWORD}';/g" ${ctc_config_php}
 sed -i "s/\$config\['redis'\]\['host'\].*/\$config['redis']['host'] = '${REDIS_HOST}';/g" ${ctc_config_php}
 sed -i "s/\$config\['redis'\]\['auth'\].*/\$config['redis']['auth'] = '${REDIS_PASSWORD}';/g" ${ctc_config_php}
-sed -i "s/\$config\['websocket'\]\['connect_address'\].*/\$config['websocket']['connect_address'] = 'http:\/\/${SITE_DOMAIN}:8282';/g" ${ctc_config_php}
+sed -i "s/\$config\['websocket'\]\['connect_address'\].*/\$config['websocket']['connect_address'] = '${SITE_DOMAIN}:8282';/g" ${ctc_config_php}
 
 #复制xunsearch配置文件
 cp ${ctc_config_dir}/xs.course.default.ini ${ctc_config_dir}/xs.course.ini
