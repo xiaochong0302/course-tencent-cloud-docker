@@ -142,7 +142,6 @@ sed -i "s/\$config\['websocket'\]\['connect_address'\].*/\$config['websocket']['
 cp ${ctc_config_dir}/xs.course.default.ini ${ctc_config_dir}/xs.course.ini
 cp ${ctc_config_dir}/xs.article.default.ini ${ctc_config_dir}/xs.article.ini
 cp ${ctc_config_dir}/xs.question.default.ini ${ctc_config_dir}/xs.question.ini
-cp ${ctc_config_dir}/xs.user.default.ini ${ctc_config_dir}/xs.user.ini
 
 #安装docker
 if [ -z "$(command -v docker)" ]; then
@@ -259,7 +258,6 @@ php console.php upgrade
 php console.php course_index rebuild
 php console.php article_index rebuild
 php console.php question_index rebuild
-php console.php user_index rebuild
 
 #清理log（之前步骤以root身份产生日志会让www-data用户无写入权限）
 rm -f storage/log/*.log
