@@ -7,7 +7,7 @@ DOCKER_DIR=/root/ctc-docker
 CTC_DIR=${DOCKER_DIR}/html/ctc
 
 #config.php
-ctc_config_php=${CTC_DIR}/config/config.php
+config_php=${CTC_DIR}/config/config.php
 
 #静态文件版本号
 static_version=$(date +%s)
@@ -30,10 +30,10 @@ fi
 cd ${DOCKER_DIR} && git pull --no-rebase
 
 #拉取ctc源码更新
-pull_result=$(cd "${CTC_DIR}" && git pull --no-rebase)
+cd ${CTC_DIR} && git pull --no-rebase
 
 #更新静态资源版本号
-sed -i "s/\$config\['static_version'\].*/\$config['static_version'] = '${static_version}';/g" "${ctc_config_php}"
+sed -i "s/\$config\['static_version'\].*/\$config['static_version'] = '${static_version}';/g" "${config_php}"
 
 docker exec -i ctc-php bash <<'EOF'
 
