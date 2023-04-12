@@ -7,8 +7,8 @@ services:
     image: ctc/nginx:latest
     container_name: ctc-nginx
     ports:
-      - 80:80
-      - 443:443
+      - "80:80"
+      - "443:443"
     volumes:
       - ./html:/var/www/html
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
@@ -24,7 +24,7 @@ services:
     image: ctc/php:latest
     container_name: ctc-php
     ports:
-      - 8282:8282
+      - "8282:8282"
     expose:
       - 9000
     volumes:
