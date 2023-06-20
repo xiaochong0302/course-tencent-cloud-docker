@@ -1,10 +1,10 @@
 /.idea
 /.env
 /html
-/backup.sh
 /install.sh
 /upgrade.sh
-/site_backup.sh
-/site_restore.sh
+/db-backup.sh
+/site-backup.sh
+/site-restore.sh
 /nginx/conf.d/default.conf
 /nginx/conf.d/ssl-default.conf
