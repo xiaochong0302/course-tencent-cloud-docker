@@ -30,7 +30,7 @@ services:
     volumes:
       - ./html:/var/www/html
       - ./php/log:/var/log/php-fpm
-      - ./php/conf.d/php.ini:/usr/local/etc/php/conf.d/php.ini
+      - ./php/conf.d/my.ini:/usr/local/etc/php/conf.d/my.ini
       - ./php/supervisor/conf.d:/etc/supervisor/conf.d
       - ./php/supervisor/log:/var/log/supervisor
     command: ["supervisord", "-n"]

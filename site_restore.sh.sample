@@ -62,8 +62,9 @@ cd ${base_dir} && tar -xzf ${site_name}.tar.gz
 
 #安装docker
 if [ -z "$(command -v docker)" ]; then
-  sudo curl -sSL https://get.daocloud.io/docker | sh
+  sudo bash ${base_dir}/get_docker.sh
   sudo systemctl enable docker
+  sudo systemctl start docker
 fi
 
 if [ -z "$(command -v docker)" ]; then
@@ -83,9 +84,11 @@ if [ ! -e '/etc/docker/daemon.json' ]; then
   sudo chmod 666 /var/run/docker.sock
 fi
 
-#安装docker-composer
+docker_compose_url="https://download.koogua.com/docker-compose-$(uname -s)-$(uname -m)"
+
+#安装docker-composer（路径转小写）
 if [ -z "$(command -v docker-compose)" ]; then
-  sudo curl -L "https://get.daocloud.io/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+  sudo curl -L "${docker_compose_url,,}" -o /usr/local/bin/docker-compose
   sudo chmod +x /usr/local/bin/docker-compose
 fi
 

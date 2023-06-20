@@ -145,7 +145,7 @@ cp ${ctc_config_dir}/xs.question.default.ini ${ctc_config_dir}/xs.question.ini
 
 #安装docker
 if [ -z "$(command -v docker)" ]; then
-  sudo curl -sSL https://download.koogua.com/get-docker.sh | sh
+  sudo bash ${base_dir}/get_docker.sh
   sudo systemctl enable docker
   sudo systemctl start docker
 fi
