@@ -62,7 +62,7 @@ cd ${base_dir} && tar -xzf ${site_name}.tar.gz
 
 #安装docker
 if [ -z "$(command -v docker)" ]; then
-  sudo bash ${base_dir}/get_docker.sh
+  sudo bash ${base_dir}/get-docker.sh
   sudo systemctl enable docker
   sudo systemctl start docker
 fi
