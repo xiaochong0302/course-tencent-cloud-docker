@@ -62,7 +62,7 @@ cd ${base_dir} && tar -xzf ${site_name}.tar.gz
 
 #安装docker
 if [ -z "$(command -v docker)" ]; then
-  sudo bash ${base_dir}/get-docker.sh
+  sudo bash ${ctc_docker_dir}/get-docker.sh
   sudo systemctl enable docker
   sudo systemctl start docker
 fi
@@ -97,7 +97,7 @@ if [ -z "$(command -v docker-compose)" ]; then
   exit 1
 fi
 
-#切换到基准目录
+#切换目录
 cd ${ctc_docker_dir} || exit
 
 #启动容器
