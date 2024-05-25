@@ -159,6 +159,8 @@ normal_print "\n------ install docker ------\n"
 #安装docker
 if [ -z "$(command -v docker)" ]; then
   sudo bash ${base_dir}/get-docker.sh
+  sudo groupadd docker
+  sudo usermod -aG docker "${USER}"
   sudo systemctl enable docker
   sudo systemctl start docker
 fi
@@ -238,7 +240,7 @@ if [ ${SITE_DEMO} = 'on' ]; then
 
   demo_sql=${base_dir}/mysql/data/demo.sql.gz
 
-    normal_print "\n------ import demo.sql.gz ------\n"
+  normal_print "\n------ import demo.sql.gz ------\n"
 
   curl https://download.koogua.com/ctc/demo.sql.gz -o ${demo_sql}
 
