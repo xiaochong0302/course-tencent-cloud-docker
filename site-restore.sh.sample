@@ -61,6 +61,9 @@ fi
 echo -e "\n------ tar -xzf ctc-docker.tar.gz ------\n"
 cd ${base_dir} && tar -xzf ${site_name}.tar.gz
 
+#加入git安全目录
+git config --global --add safe.directory ${ctc_docker_dir}/html/ctc
+
 #安装docker
 echo -e "\n------ install docker ------\n"
 if [ -z "$(command -v docker)" ]; then

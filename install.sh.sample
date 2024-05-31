@@ -108,6 +108,9 @@ else
   cd ${ctc_dir} && git pull
 fi
 
+#加入git安全目录
+git config --global --add safe.directory ${ctc_dir}
+
 #docker .env文件
 docker_env=${base_dir}/.env
 
