@@ -48,12 +48,15 @@ if [ ! -d ${ctc_docker_dir} ]; then
 fi
 
 #停止容器
+echo -e "\n------ stop docker services ------\n"
 cd ${ctc_docker_dir} && docker-compose down
 
 #压缩文件
+echo -e "\n------ create ctc-docker.tar.gz ------\n"
 cd ${base_dir} && tar -czf ${site_name}.tar.gz ${site_name}
 
 #重启容器
+echo -e "\n------ start docker services ------\n"
 cd ${ctc_docker_dir} && docker-compose up -d
 
 if [ -e ${ctc_docker_tar} ]; then
