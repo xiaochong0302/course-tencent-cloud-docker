@@ -38,8 +38,8 @@ os_type() {
 
 #判断是否root用户
 if [[ $EUID -ne 0 ]]; then
-    error_print "\n------ error: this script must be run as root ------\n" 1>&2
-    exit 1
+  error_print "\n------ error: this script must be run as root ------\n" 1>&2
+  exit 1
 fi
 
 #安装git和curl
@@ -68,6 +68,8 @@ git config --global --add safe.directory ${ctc_docker_dir}/html/ctc
 echo -e "\n------ install docker ------\n"
 if [ -z "$(command -v docker)" ]; then
   sudo bash ${ctc_docker_dir}/get-docker.sh
+  sudo groupadd docker
+  sudo usermod -aG docker "${USER}"
   sudo systemctl enable docker
   sudo systemctl start docker
 fi
@@ -83,7 +85,19 @@ fi
 
 #docker镜像加速
 if [ ! -e '/etc/docker/daemon.json' ]; then
-  sudo echo '{"registry-mirrors": ["https://mirror.ccs.tencentyun.com","https://docker.m.daocloud.io"]}' | tee /etc/docker/daemon.json
+  tee -a /etc/docker/daemon.json <<-EOF
+{
+  "registry-mirrors": [
+    "https://mirror.ccs.tencentyun.com",
+    "https://docker.m.daocloud.io"
+  ],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "500m",
+    "max-file": "3"
+  }
+}
+EOF
   sudo systemctl daemon-reload
   sudo systemctl restart docker
   sudo chmod 666 /var/run/docker.sock

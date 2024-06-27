@@ -179,7 +179,19 @@ fi
 
 #docker镜像加速
 if [ ! -e '/etc/docker/daemon.json' ]; then
-  sudo echo '{"registry-mirrors": ["https://mirror.ccs.tencentyun.com","https://docker.m.daocloud.io"]}' | tee /etc/docker/daemon.json
+  tee -a /etc/docker/daemon.json <<-EOF
+{
+  "registry-mirrors": [
+    "https://mirror.ccs.tencentyun.com",
+    "https://docker.m.daocloud.io"
+  ],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "500m",
+    "max-file": "3"
+  }
+}
+EOF
   sudo systemctl daemon-reload
   sudo systemctl restart docker
   sudo chmod 666 /var/run/docker.sock
