@@ -72,6 +72,16 @@ os_type() {
   fi
 }
 
+#判断镜像存在
+image_exists() {
+  local image=$1
+  if docker image inspect "$image" >/dev/null 2>&1; then
+    echo 'yes'
+  else
+    echo 'no'
+  fi
+}
+
 #判断是否root用户
 if [[ $EUID -ne 0 ]]; then
   error_print "\n------ this script must be run as root ------\n"
