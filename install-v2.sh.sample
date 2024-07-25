@@ -72,6 +72,16 @@ os_type() {
   fi
 }
 
+#判断镜像存在
+image_exists() {
+  local image=$1
+  if docker image inspect "$image" >/dev/null 2>&1; then
+    echo 'yes'
+  else
+    echo 'no'
+  fi
+}
+
 #判断是否root用户
 if [[ $EUID -ne 0 ]]; then
   error_print "\n------ this script must be run as root ------\n"
@@ -249,7 +259,7 @@ if [ "$(image_exists hightman/xunsearch:latest)" = 'no' ]; then
 fi
 
 if [ "$(image_exists xiaochong0302/php:ctc)" = 'no' ]; then
-  file=xiaochong0302-php-ctc-pro.tar.gz
+  file=xiaochong0302-php-ctc.tar.gz
   curl -O ${download_dir}/${file}
   docker load -i ${file}
   rm -f ${file}
