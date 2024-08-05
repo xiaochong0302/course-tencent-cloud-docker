@@ -12,28 +12,39 @@ config_php=${CTC_DIR}/config/config.php
 #静态文件版本号
 static_version=$(date +%s)
 
+#普通信息输出
+normal_print() {
+  echo -e "\033[34m \n $1 \n \033[0m"
+}
+
 #成功信息输出
 success_print() {
-  echo -e "\033[32m $1 \033[0m"
+  echo -e "\033[32m \n $1 \n \033[0m"
 }
 
 #失败信息输出
 error_print() {
-  echo -e "\033[31m $1 \033[0m"
+  echo -e "\033[31m \n $1 \n \033[0m"
 }
 
 if [ ! -d "${CTC_DIR}" ]; then
-  error_print "\n------ ctc dir not existed ------\n"
+  error_print "------ ctc dir not existed ------"
 fi
+
+normal_print "------ git pull ctc-docker ------"
 
 #拉取docker更新
 cd ${DOCKER_DIR} && git pull --no-rebase
+
+normal_print "------ git pull ctc ------"
 
 #拉取ctc源码更新
 cd ${CTC_DIR} && git pull --no-rebase
 
 #更新静态资源版本号
 sed -i "s/\$config\['static_version'\].*/\$config['static_version'] = '${static_version}';/g" "${config_php}"
+
+success_print "------ ctc upgrade -------"
 
 docker exec -i ctc-php bash <<'EOF'
 
@@ -53,4 +64,4 @@ php console.php upgrade
 exit
 EOF
 
-success_print "\n------ upgrade finished -------\n"
+success_print "------ upgrade finished -------"

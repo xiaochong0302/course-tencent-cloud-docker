@@ -12,14 +12,19 @@ ctc_docker_dir=${base_dir}/${site_name}
 #ctc-docker备份文件
 ctc_docker_tar=${base_dir}/${site_name}.tar.gz
 
+#普通信息输出
+normal_print() {
+  echo -e "\033[34m \n $1 \n \033[0m"
+}
+
 #成功信息输出
 success_print() {
-  echo -e "\033[32m $1 \033[0m"
+  echo -e "\033[32m \n $1 \n \033[0m"
 }
 
 #失败信息输出
 error_print() {
-  echo -e "\033[31m $1 \033[0m"
+  echo -e "\033[31m \n $1 \n \033[0m"
 }
 
 #系统判断
@@ -38,27 +43,30 @@ os_type() {
 
 #判断是否root用户
 if [[ $EUID -ne 0 ]]; then
-    error_print "\n------ error: this script must be run as root ------\n" 1>&2
+    error_print "------ error: this script must be run as root ------" 1>&2
     exit 1
 fi
 
 if [ ! -d ${ctc_docker_dir} ]; then
-  error_print "\n------ error: ctc-docker dir not found ------\n"
+  error_print "------ error: ctc-docker dir not found ------"
   exit 1
 fi
 
+normal_print "------ stop docker services ------"
+
 #停止容器
-echo -e "\n------ stop docker services ------\n"
 cd ${ctc_docker_dir} && docker-compose down
 
+normal_print "------ create ctc-docker.tar.gz ------"
+
 #压缩文件
-echo -e "\n------ create ctc-docker.tar.gz ------\n"
 cd ${base_dir} && tar -czf ${site_name}.tar.gz ${site_name}
 
+normal_print "------ start docker services ------"
+
 #重启容器
-echo -e "\n------ start docker services ------\n"
 cd ${ctc_docker_dir} && docker-compose up -d
 
 if [ -e ${ctc_docker_tar} ]; then
-  success_print "\n------ backup completed ------\n"
+  success_print "------ backup completed ------"
 fi

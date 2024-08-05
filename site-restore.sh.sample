@@ -12,14 +12,19 @@ ctc_docker_dir=${base_dir}/${site_name}
 #ctc-docker备份文件
 ctc_docker_tar=${base_dir}/${site_name}.tar.gz
 
+#普通信息输出
+normal_print() {
+  echo -e "\033[34m \n $1 \n \033[0m"
+}
+
 #成功信息输出
 success_print() {
-  echo -e "\033[32m $1 \033[0m"
+  echo -e "\033[32m \n $1 \n \033[0m"
 }
 
 #失败信息输出
 error_print() {
-  echo -e "\033[31m $1 \033[0m"
+  echo -e "\033[31m \n $1 \n \033[0m"
 }
 
 #系统判断
@@ -38,9 +43,11 @@ os_type() {
 
 #判断是否root用户
 if [[ $EUID -ne 0 ]]; then
-  error_print "\n------ error: this script must be run as root ------\n" 1>&2
+  error_print "------ error: this script must be run as root ------" 1>&2
   exit 1
 fi
+
+normal_print "------ update host system ------"
 
 #安装git和curl
 if [ "$(os_type)" = 'ubuntu' ] || [ "$(os_type)" = 'debian' ]; then
@@ -48,24 +55,26 @@ if [ "$(os_type)" = 'ubuntu' ] || [ "$(os_type)" = 'debian' ]; then
 elif [ "$(os_type)" = 'centos' ]; then
   sudo yum update && yum install -y curl git
 else
-  error_print "\n------ we only support (ubuntu|debian|centos) currently ------\n"
+  error_print "------ we only support (ubuntu|debian|centos) currently ------"
   exit 1
 fi
 
 if [ ! -e ${ctc_docker_tar} ]; then
-  error_print "\n------ error: ctc-docker.tar.gz not found ------\n"
+  error_print "------ error: ctc-docker.tar.gz not found ------"
   exit 1
 fi
 
+normal_print "------ tar -xzf ctc-docker.tar.gz ------"
+
 #解压ctc-docker.tar.gz
-echo -e "\n------ tar -xzf ctc-docker.tar.gz ------\n"
 cd ${base_dir} && tar -xzf ${site_name}.tar.gz
 
 #加入git安全目录
 git config --global --add safe.directory ${ctc_docker_dir}/html/ctc
 
+normal_print "------ install docker ------"
+
 #安装docker
-echo -e "\n------ install docker ------\n"
 if [ -z "$(command -v docker)" ]; then
   sudo bash ${ctc_docker_dir}/get-docker.sh
   sudo groupadd docker
@@ -75,7 +84,7 @@ if [ -z "$(command -v docker)" ]; then
 fi
 
 if [ -z "$(command -v docker)" ]; then
-  error_print "\n------ error: docker command not found, please try again ------\n"
+  error_print "------ error: docker command not found, please try again ------"
   exit 1
 fi
 
@@ -103,55 +112,62 @@ EOF
   sudo chmod 666 /var/run/docker.sock
 fi
 
+normal_print "------ install docker-compose ------"
+
 docker_compose_url="https://download.koogua.com/docker-compose-$(uname -s)-$(uname -m)"
 
 #安装docker-compose（路径转小写）
-echo -e "\n------ install docker-compose ------\n"
 if [ -z "$(command -v docker-compose)" ]; then
   sudo curl -L "${docker_compose_url,,}" -o /usr/local/bin/docker-compose
   sudo chmod +x /usr/local/bin/docker-compose
 fi
 
 if [ -z "$(command -v docker-compose)" ]; then
-  error_print "\n------ error: docker-compose command not found, please try again ------\n"
+  error_print "------ error: docker-compose command not found, please try again ------"
   exit 1
 fi
 
 #切换目录
 cd ${ctc_docker_dir} || exit
 
+normal_print "------ build docker images ------"
+
+#构建镜像
+docker-compose build
+
+normal_print "------ start docker services ------"
+
 #启动容器
-echo -e "\n------ start docker services ------\n"
 docker-compose up -d
 
 docker_ps=$(docker ps)
 
 if [[ "${docker_ps}" =~ 'nginx' ]]; then
-  success_print "nginx service ok\n"
+  success_print "------ nginx service ok ------"
 else
-  error_print "nginx service failed\n"
+  error_print "------ nginx service failed ------"
 fi
 
 if [[ "${docker_ps}" =~ 'php' ]]; then
-  success_print "php service ok\n"
+  success_print "------ php service ok ------"
 else
-  error_print "php service failed\n"
+  error_print "------ php service failed ------"
 fi
 
 if [[ "${docker_ps}" =~ 'mysql' ]]; then
-  success_print "mysql service ok\n"
+  success_print "------ mysql service ok ------"
 else
-  error_print "mysql service failed\n"
+  error_print "------ mysql service failed ------"
 fi
 
 if [[ "${docker_ps}" =~ 'redis' ]]; then
-  success_print "redis service ok\n"
+  success_print "------ redis service ok ------"
 else
-  error_print "redis service failed\n"
+  error_print "------ redis service failed ------"
 fi
 
 if [[ "${docker_ps}" =~ 'xunsearch' ]]; then
-  success_print "xunsearch service ok\n"
+  success_print "------ xunsearch service ok ------"
 else
-  error_print "xunsearch service failed\n"
+  error_print "------ xunsearch service failed ------"
 fi
