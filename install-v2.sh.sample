@@ -192,9 +192,7 @@ if [ ! -e '/etc/docker/daemon.json' ]; then
   tee -a /etc/docker/daemon.json <<-EOF
 {
   "registry-mirrors": [
-    "https://mirror.ccs.tencentyun.com",
-    "https://docker.m.daocloud.io",
-    "https://quay.13140521.xyz"
+    "https://mirror.ccs.tencentyun.com"
   ],
   "log-driver": "json-file",
   "log-opts": {
