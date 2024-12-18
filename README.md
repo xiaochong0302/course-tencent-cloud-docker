@@ -7,7 +7,7 @@
 下载安装脚本
 
 ```
-cd ~ && curl http://download.koogua.com/ctc/install.sh -o install.sh
+cd ~ && curl https://download.koogua.com/ctc/install.sh -o install.sh
 ```
 
 增加执行权限
@@ -28,6 +28,14 @@ nano install.sh
 bash install.sh
 ```
 
+### 备用脚本
+
+如果拉取镜像失败（被墙了），先把原来的 `ctc-docker` 目录删除，再用备用脚本重新安装，其余步骤相同。
+
+```
+cd ~ && curl https://download.koogua.com/ctc/install-v2.sh -o install.sh
+```
+
 ### 访问网站
 
 * 管理账号：10000@163.com / 123456
@@ -35,9 +43,10 @@ bash install.sh
 * 后台地址：http://{your-domain}.com/admin
 
 后续设置： [系统设置](https://koogua.com/page/wiki)
-
-   
+ 
 ### 测试数据
+
+如果安装过程中选择了测试数据，相关账号和空白安装有所不同。
 
 管理账号：100015@163.com / 123456
 
