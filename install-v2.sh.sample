@@ -8,9 +8,6 @@ SITE_DEMO=off
 #站点域名(不包括http)
 SITE_DOMAIN=abc.com
 
-#站点密钥(数字字母组合，不要用特殊字符)
-SITE_KEY=1qaz2wsx3edc
-
 #mysql超级用户密码（数字字母组合，不要用特殊字符）
 MYSQL_ROOT_PASSWORD=1qaz2wsx3edc
 
@@ -151,8 +148,11 @@ ctc_config_php=${ctc_config_dir}/config.php
 #复制config.php
 cp ${ctc_config_dir}/config.default.php ${ctc_config_php}
 
+#生成随机站点密钥
+site_key=$(tr -dc 'a-zA-Z0-9' < /dev/urandom | fold -w 32 | head -n 1)
+
 #替换config.php配置项
-sed -i "s/\$config\['key'\].*/\$config['key'] = '${SITE_KEY}';/g" ${ctc_config_php}
+sed -i "s/\$config\['key'\].*/\$config['key'] = '${site_key}';/g" ${ctc_config_php}
 sed -i "s/\$config\['db'\]\['host'\].*/\$config['db']['host'] = '${MYSQL_HOST}';/g" ${ctc_config_php}
 sed -i "s/\$config\['db'\]\['port'\].*/\$config['db']['port'] = '${MYSQL_PORT}';/g" ${ctc_config_php}
 sed -i "s/\$config\['db'\]\['dbname'\].*/\$config['db']['dbname'] = '${MYSQL_DATABASE}';/g" ${ctc_config_php}
