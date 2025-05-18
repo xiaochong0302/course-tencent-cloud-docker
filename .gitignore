@@ -2,6 +2,7 @@
 /.env
 /html
 /install.sh
+/install-v2.sh
 /upgrade.sh
 /db-backup.sh
 /site-backup.sh

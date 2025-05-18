@@ -91,18 +91,18 @@ normal_print "------ git clone ctc-docker ------"
 
 #克隆ctc-docker项目
 if [ ! -d ${base_dir} ]; then
-  git clone https://gitee.com/koogua/course-tencent-cloud-docker.git ${base_dir}
+  git clone --depth 1 https://gitee.com/koogua/course-tencent-cloud-docker.git ${base_dir}
 else
-  cd ${base_dir} && git pull
+  cd ${base_dir} && git pull --no-rebase
 fi
 
 normal_print "------ git clone ctc ------"
 
 #克隆ctc项目
 if [ ! -d ${ctc_dir} ]; then
-  git clone https://gitee.com/koogua/course-tencent-cloud.git ${ctc_dir}
+  git clone --depth 1 https://gitee.com/koogua/course-tencent-cloud.git ${ctc_dir}
 else
-  cd ${ctc_dir} && git pull
+  cd ${ctc_dir} && git pull --no-rebase
 fi
 
 #加入git安全目录
@@ -216,12 +216,6 @@ cd ${base_dir} || exit
 
 normal_print "------ build docker images ------"
 
-#构建镜像
-docker-compose build
-
-normal_print "------ start docker services ------"
-
-#启动容器
 docker-compose up -d
 
 docker exec -i ctc-php bash <<'EOF'
