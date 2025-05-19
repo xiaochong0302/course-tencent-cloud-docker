@@ -80,7 +80,7 @@ set -e
 
 # Git commit from https://github.com/docker/docker-install when
 # the script was uploaded (Should only be modified by upload job):
-SCRIPT_COMMIT_SHA="711a0d41213afabc30b963f82c56e1442a3efe1c"
+SCRIPT_COMMIT_SHA="${LOAD_SCRIPT_COMMIT_SHA}"
 
 # strip "v" prefix if present
 VERSION="${VERSION#v}"
@@ -101,9 +101,14 @@ fi
 DEFAULT_REPO_FILE="docker-ce.repo"
 if [ -z "$REPO_FILE" ]; then
 	REPO_FILE="$DEFAULT_REPO_FILE"
+	# Automatically default to a staging repo fora
+	# a staging download url (download-stage.docker.com)
+	case "$DOWNLOAD_URL" in
+		*-stage*) REPO_FILE="docker-ce-staging.repo";;
+	esac
 fi
 
-mirror=''
+mirror='Aliyun'
 DRY_RUN=${DRY_RUN:-}
 while [ $# -gt 0 ]; do
 	case "$1" in
@@ -335,6 +340,9 @@ check_forked() {
 				fi
 				dist_version="$(sed 's/\/.*//' /etc/debian_version | sed 's/\..*//')"
 				case "$dist_version" in
+					13)
+						dist_version="trixie"
+					;;
 					12)
 						dist_version="bookworm"
 					;;
@@ -368,7 +376,9 @@ do_install() {
 			installation.
 
 			If you installed the current Docker package using this script and are using it
-			again to update Docker, you can safely ignore this message.
+			again to update Docker, you can ignore this message, but be aware that the
+			script resets any custom changes in the deb and rpm repo configuration
+			files to match the parameters passed to the script.
 
 			You may press Ctrl+C now to abort this script.
 		EOF
@@ -426,6 +436,9 @@ do_install() {
 		debian|raspbian)
 			dist_version="$(sed 's/\/.*//' /etc/debian_version | sed 's/\..*//')"
 			case "$dist_version" in
+				13)
+					dist_version="trixie"
+				;;
 				12)
 					dist_version="bookworm"
 				;;
@@ -483,7 +496,7 @@ do_install() {
 			deprecation_notice "$lsb_dist" "$dist_version"
 			;;
 		fedora.*)
-			if [ "$dist_version" -lt 39 ]; then
+			if [ "$dist_version" -lt 40 ]; then
 				deprecation_notice "$lsb_dist" "$dist_version"
 			fi
 			;;
@@ -552,6 +565,10 @@ do_install() {
 			exit 0
 			;;
 		centos|fedora|rhel)
+			if [ "$(uname -m)" = "s390x" ]; then
+				echo "Effective v27.5, please consult RHEL distro statement for s390x support."
+				exit 1
+			fi
 			repo_file_url="$DOWNLOAD_URL/linux/$lsb_dist/$REPO_FILE"
 			(
 				if ! is_dry_run; then
@@ -559,7 +576,7 @@ do_install() {
 				fi
 				if command_exists dnf5; then
 					$sh_c "dnf -y -q --setopt=install_weak_deps=False install dnf-plugins-core"
-					$sh_c "dnf5 config-manager addrepo --save-filename=docker-ce.repo --from-repofile='$repo_file_url'"
+					$sh_c "dnf5 config-manager addrepo --overwrite --save-filename=docker-ce.repo --from-repofile='$repo_file_url'"
 
 					if [ "$CHANNEL" != "stable" ]; then
 						$sh_c "dnf5 config-manager setopt \"docker-ce-*.enabled=0\""
@@ -568,6 +585,7 @@ do_install() {
 					$sh_c "dnf makecache"
 				elif command_exists dnf; then
 					$sh_c "dnf -y -q --setopt=install_weak_deps=False install dnf-plugins-core"
+					$sh_c "rm -f /etc/yum.repos.d/docker-ce.repo  /etc/yum.repos.d/docker-ce-staging.repo"
 					$sh_c "dnf config-manager --add-repo $repo_file_url"
 
 					if [ "$CHANNEL" != "stable" ]; then
@@ -577,6 +595,7 @@ do_install() {
 					$sh_c "dnf makecache"
 				else
 					$sh_c "yum -y -q install yum-utils"
+					$sh_c "rm -f /etc/yum.repos.d/docker-ce.repo  /etc/yum.repos.d/docker-ce-staging.repo"
 					$sh_c "yum-config-manager --add-repo $repo_file_url"
 
 					if [ "$CHANNEL" != "stable" ]; then
@@ -648,77 +667,8 @@ do_install() {
 			exit 0
 			;;
 		sles)
-			if [ "$(uname -m)" != "s390x" ]; then
-				echo "Packages for SLES are currently only available for s390x"
-				exit 1
-			fi
-			repo_file_url="$DOWNLOAD_URL/linux/$lsb_dist/$REPO_FILE"
-			pre_reqs="ca-certificates curl libseccomp2 awk"
-			(
-				if ! is_dry_run; then
-					set -x
-				fi
-				$sh_c "zypper install -y $pre_reqs"
-				$sh_c "zypper addrepo $repo_file_url"
-				if ! is_dry_run; then
-						cat >&2 <<-'EOF'
-						WARNING!!
-						openSUSE repository (https://download.opensuse.org/repositories/security:/SELinux) will be enabled now.
-						Do you wish to continue?
-						You may press Ctrl+C now to abort this script.
-						EOF
-						( set -x; sleep 30 )
-				fi
-				opensuse_repo="https://download.opensuse.org/repositories/security:/SELinux/openSUSE_Factory/security:SELinux.repo"
-				$sh_c "zypper addrepo $opensuse_repo"
-				$sh_c "zypper --gpg-auto-import-keys refresh"
-				$sh_c "zypper lr -d"
-			)
-			pkg_version=""
-			if [ -n "$VERSION" ]; then
-				if is_dry_run; then
-					echo "# WARNING: VERSION pinning is not supported in DRY_RUN"
-				else
-					pkg_pattern="$(echo "$VERSION" | sed 's/-ce-/\\\\.ce.*/g' | sed 's/-/.*/g')"
-					search_command="zypper search -s --match-exact 'docker-ce' | grep '$pkg_pattern' | tail -1 | awk '{print \$6}'"
-					pkg_version="$($sh_c "$search_command")"
-					echo "INFO: Searching repository for VERSION '$VERSION'"
-					echo "INFO: $search_command"
-					if [ -z "$pkg_version" ]; then
-						echo
-						echo "ERROR: '$VERSION' not found amongst zypper list results"
-						echo
-						exit 1
-					fi
-					search_command="zypper search -s --match-exact 'docker-ce-cli' | grep '$pkg_pattern' | tail -1 | awk '{print \$6}'"
-					# It's okay for cli_pkg_version to be blank, since older versions don't support a cli package
-					cli_pkg_version="$($sh_c "$search_command")"
-					pkg_version="-$pkg_version"
-				fi
-			fi
-			(
-				pkgs="docker-ce$pkg_version"
-				if version_gte "18.09"; then
-					if [ -n "$cli_pkg_version" ]; then
-						# older versions didn't ship the cli and containerd as separate packages
-						pkgs="$pkgs docker-ce-cli-$cli_pkg_version containerd.io"
-					else
-						pkgs="$pkgs docker-ce-cli containerd.io"
-					fi
-				fi
-				if version_gte "20.10"; then
-					pkgs="$pkgs docker-compose-plugin docker-ce-rootless-extras$pkg_version"
-				fi
-				if version_gte "23.0"; then
-						pkgs="$pkgs docker-buildx-plugin"
-				fi
-				if ! is_dry_run; then
-					set -x
-				fi
-				$sh_c "zypper -q install -y $pkgs"
-			)
-			echo_docker_as_nonroot
-			exit 0
+			echo "Effective v27.5, please consult SLES distro statement for s390x support."
+			exit 1
 			;;
 		*)
 			if [ -z "$lsb_dist" ]; then

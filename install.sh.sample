@@ -162,10 +162,6 @@ normal_print "------ install docker ------"
 #安装docker
 if [ -z "$(command -v docker)" ]; then
   sudo bash ${base_dir}/get-docker.sh --mirror Aliyun
-  sudo groupadd docker
-  sudo usermod -aG docker "${USER}"
-  sudo systemctl enable docker
-  sudo systemctl start docker
 fi
 
 if [ -z "$(command -v docker)" ]; then
