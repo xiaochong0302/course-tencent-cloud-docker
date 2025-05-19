@@ -132,12 +132,6 @@ cd ${ctc_docker_dir} || exit
 
 normal_print "------ build docker images ------"
 
-#构建镜像
-docker-compose build
-
-normal_print "------ start docker services ------"
-
-#启动容器
 docker-compose up -d
 
 docker_ps=$(docker ps)
