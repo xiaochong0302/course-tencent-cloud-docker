@@ -181,7 +181,7 @@ if [ -z "$(command -v docker)" ]; then
 fi
 
 if [ -z "$(command -v docker)" ]; then
-  error_print "------ error: docker command not found, please try again ------"
+  error_print "------ docker command not found, please try again ------"
   exit 1
 fi
 
@@ -219,7 +219,7 @@ if [ -z "$(command -v docker-compose)" ]; then
 fi
 
 if [ -z "$(command -v docker-compose)" ]; then
-  error_print "------ error: docker-compose command not found, please try again ------"
+  error_print "------ docker-compose command not found, please try again ------"
   exit 1
 fi
 
@@ -230,7 +230,6 @@ normal_print "------ fetch & load docker images ------"
 
 download_dir=https://download.koogua.com/docker-images
 
-#下载&导入镜像
 if [ "$(image_exists nginx:1.18)" = 'no' ]; then
   file=nginx-1.18.tar.gz
   curl --retry 3 --retry-delay 5 --retry-max-time 30 -O ${download_dir}/${file}

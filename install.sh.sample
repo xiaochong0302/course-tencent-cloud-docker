@@ -171,7 +171,7 @@ if [ -z "$(command -v docker)" ]; then
 fi
 
 if [ -z "$(command -v docker)" ]; then
-  error_print "------ error: docker command not found, please try again ------"
+  error_print "------ docker command not found, please try again ------"
   exit 1
 fi
 
@@ -209,7 +209,7 @@ if [ -z "$(command -v docker-compose)" ]; then
 fi
 
 if [ -z "$(command -v docker-compose)" ]; then
-  error_print "------ error: docker-compose command not found, please try again ------"
+  error_print "------ docker-compose command not found, please try again ------"
   exit 1
 fi
 
