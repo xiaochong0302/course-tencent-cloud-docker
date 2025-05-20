@@ -79,10 +79,16 @@ image_exists() {
   fi
 }
 
-#判断是否root用户
+#判断root用户
 if [[ $EUID -ne 0 ]]; then
   error_print "------ this script must be run as root ------"
   exit 1
+fi
+
+#判断系统架构
+if [[ "$(uname -m)" != "x86_64" ]]; then
+    error_print "------ we only support x86_64 architecture currently ------"
+    exit 1
 fi
 
 normal_print "------ update host system ------"
@@ -204,11 +210,11 @@ fi
 
 normal_print "------ install docker-compose ------"
 
-docker_compose_url="https://download.koogua.com/docker-compose-$(uname -s)-$(uname -m)"
+docker_compose_url="https://download.koogua.com/docker-compose-linux-x86_64"
 
-#安装docker-compose（路径转小写）
+#安装docker-compose
 if [ -z "$(command -v docker-compose)" ]; then
-  sudo curl -L "${docker_compose_url,,}" -o /usr/local/bin/docker-compose
+  sudo curl --retry 3 --retry-delay 5 --retry-max-time 30 "${docker_compose_url}" -o /usr/local/bin/docker-compose
   sudo chmod +x /usr/local/bin/docker-compose
 fi
 
@@ -227,35 +233,35 @@ download_dir=https://download.koogua.com/docker-images
 #下载&导入镜像
 if [ "$(image_exists nginx:1.18)" = 'no' ]; then
   file=nginx-1.18.tar.gz
-  curl -O ${download_dir}/${file}
+  curl --retry 3 --retry-delay 5 --retry-max-time 30 -O ${download_dir}/${file}
   docker load -i ${file}
   rm -f ${file}
 fi
 
 if [ "$(image_exists mysql:5.7)" = 'no' ]; then
   file=mysql-5.7.tar.gz
-  curl -O ${download_dir}/${file}
+  curl --retry 3 --retry-delay 5 --retry-max-time 30 -O ${download_dir}/${file}
   docker load -i ${file}
   rm -f ${file}
 fi
 
 if [ "$(image_exists redis:5.0)" = 'no' ]; then
   file=redis-5.0.tar.gz
-  curl -O ${download_dir}/${file}
+  curl --retry 3 --retry-delay 5 --retry-max-time 30 -O ${download_dir}/${file}
   docker load -i ${file}
   rm -f ${file}
 fi
 
 if [ "$(image_exists hightman/xunsearch:latest)" = 'no' ]; then
   file=hightman-xunsearch-latest.tar.gz
-  curl -O ${download_dir}/${file}
+  curl --retry 3 --retry-delay 5 --retry-max-time 30 -O ${download_dir}/${file}
   docker load -i ${file}
   rm -f ${file}
 fi
 
 if [ "$(image_exists xiaochong0302/php:ctc)" = 'no' ]; then
   file=xiaochong0302-php-ctc.tar.gz
-  curl -O ${download_dir}/${file}
+  curl --retry 3 --retry-delay 5 --retry-max-time 30 -O ${download_dir}/${file}
   docker load -i ${file}
   rm -f ${file}
 fi
@@ -298,7 +304,7 @@ if [ ${SITE_DEMO} = 'on' ]; then
 
   normal_print "------ import demo.sql.gz ------"
 
-  curl https://download.koogua.com/ctc/demo.sql.gz -o ${demo_sql}
+  curl --retry 3 --retry-delay 5 --retry-max-time 30 https://download.koogua.com/ctc/demo.sql.gz -o ${demo_sql}
 
   docker exec -i ctc-mysql bash <<'EOF'
 

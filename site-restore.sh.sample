@@ -41,10 +41,16 @@ os_type() {
   fi
 }
 
-#判断是否root用户
+#判断root用户
 if [[ $EUID -ne 0 ]]; then
-  error_print "------ error: this script must be run as root ------" 1>&2
+  error_print "------ error: this script must be run as root ------"
   exit 1
+fi
+
+#判断系统架构
+if [[ "$(uname -m)" != "x86_64" ]]; then
+    error_print "------ we only support x86_64 architecture currently ------"
+    exit 1
 fi
 
 normal_print "------ update host system ------"
@@ -76,7 +82,7 @@ normal_print "------ install docker ------"
 
 #安装docker
 if [ -z "$(command -v docker)" ]; then
-  sudo bash ${ctc_docker_dir}/get-docker.sh
+  sudo bash ${ctc_docker_dir}/get-docker.sh --mirror Aliyun
 fi
 
 if [ -z "$(command -v docker)" ]; then
@@ -93,8 +99,7 @@ if [ ! -e '/etc/docker/daemon.json' ]; then
   tee -a /etc/docker/daemon.json <<-EOF
 {
   "registry-mirrors": [
-    "https://mirror.ccs.tencentyun.com",
-    "https://docker.m.daocloud.io"
+    "https://mirror.ccs.tencentyun.com"
   ],
   "log-driver": "json-file",
   "log-opts": {
@@ -110,11 +115,11 @@ fi
 
 normal_print "------ install docker-compose ------"
 
-docker_compose_url="https://download.koogua.com/docker-compose-$(uname -s)-$(uname -m)"
+docker_compose_url="https://download.koogua.com/docker-compose-linux-x86_64"
 
-#安装docker-compose（路径转小写）
+#安装docker-compose
 if [ -z "$(command -v docker-compose)" ]; then
-  sudo curl -L "${docker_compose_url,,}" -o /usr/local/bin/docker-compose
+  sudo curl --retry 3 --retry-delay 5 --retry-max-time 30 "${docker_compose_url}" -o /usr/local/bin/docker-compose
   sudo chmod +x /usr/local/bin/docker-compose
 fi
 
