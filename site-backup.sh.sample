@@ -27,20 +27,6 @@ error_print() {
   echo -e "\033[31m \n $1 \n \033[0m"
 }
 
-#系统判断
-os_type() {
-  os=$(grep "^ID=" /etc/os-release)
-  if [[ ${os} =~ 'centos' ]]; then
-    echo 'centos'
-  elif [[ ${os} =~ 'ubuntu' ]]; then
-    echo 'ubuntu'
-  elif [[ ${os} =~ 'debian' ]]; then
-    echo 'debian'
-  else
-    echo 'other'
-  fi
-}
-
 #判断是否root用户
 if [[ $EUID -ne 0 ]]; then
     error_print "------ error: this script must be run as root ------" 1>&2

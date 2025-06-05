@@ -223,6 +223,16 @@ if [ -z "$(command -v docker-compose)" ]; then
   exit 1
 fi
 
+#设置ctc目录权限
+chown -R www-data:www-data ${ctc_dir}
+chmod -R 775 ${ctc_dir}
+
+#mysql日志目录
+mysql_log_dir=${base_dir}/mysql/log
+
+#修改mysql日志目录的属主，否则启动不了
+sudo chown -R 999:999 ${mysql_log_dir}
+
 #切换到基准目录
 cd ${base_dir} || exit
 
@@ -269,32 +279,11 @@ normal_print "------ build docker images ------"
 
 docker-compose up -d
 
-docker exec -i ctc-php bash <<'EOF'
-
-ctc_dir=/var/www/html/ctc
-tmp_sitemap_xml=${ctc_dir}/storage/tmp/sitemap.xml
-public_sitemap_xml=${ctc_dir}/public/sitemap.xml
-
-#创建并连接sitemap.xml
-if [ ! -e ${tmp_sitemap_xml} ]; then
-  touch ${tmp_sitemap_xml}
-fi
-
-#覆盖软连接，避免错误的软连接
-ln -sf ${tmp_sitemap_xml} ${public_sitemap_xml}
-
-#统一ctc目录权限
-chown -R www-data:www-data ${ctc_dir}
-
-#判断mysql容器是否已经启动成功
-until nc -z -v -w30 mysql 3306 &> /dev/null
-do
-  echo "waiting for mysql service..."
-  sleep 1
+#等待MySQL启动
+until docker exec ctc-mysql mysqladmin ping -u"${MYSQL_USER}" -p"${MYSQL_PASSWORD}" --silent; do
+  echo "Waiting for MySQL connection..."
+  sleep 2
 done
-
-exit
-EOF
 
 #导入测试数据
 if [ ${SITE_DEMO} = 'on' ]; then
@@ -307,7 +296,7 @@ if [ ${SITE_DEMO} = 'on' ]; then
 
   docker exec -i ctc-mysql bash <<'EOF'
 
-  gunzip < /var/lib/mysql/demo.sql.gz | mysql -u ${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_DATABASE}
+    gunzip < /var/lib/mysql/demo.sql.gz | mysql -u"${MYSQL_USER}" -p"${MYSQL_PASSWORD}" "${MYSQL_DATABASE}"
 
   exit
 

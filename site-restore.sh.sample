@@ -9,6 +9,9 @@ site_name=ctc-docker
 #ctc-docker目录
 ctc_docker_dir=${base_dir}/${site_name}
 
+#ctc 应用目录
+ctc_html_dir=${ctc_docker_dir}/html/ctc
+
 #ctc-docker备份文件
 ctc_docker_tar=${base_dir}/${site_name}.tar.gz
 
@@ -76,7 +79,7 @@ normal_print "------ tar -xzf ctc-docker.tar.gz ------"
 cd ${base_dir} && tar -xzf ${site_name}.tar.gz
 
 #加入git安全目录
-git config --global --add safe.directory ${ctc_docker_dir}/html/ctc
+git config --global --add safe.directory ${ctc_html_dir}
 
 normal_print "------ install docker ------"
 
