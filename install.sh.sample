@@ -231,10 +231,16 @@ normal_print "------ build docker images ------"
 docker-compose up -d
 
 #等待MySQL启动
-until docker exec ctc-mysql mysqladmin ping -u"${MYSQL_USER}" -p"${MYSQL_PASSWORD}" --silent; do
-  echo "Waiting for MySQL connection..."
+docker exec -i ctc-php bash <<'EOF'
+
+until nc -z -v -w30 mysql 3306 &> /dev/null
+do
+  echo "waiting for mysql service..."
   sleep 2
 done
+
+exit
+EOF
 
 #导入测试数据
 if [ ${SITE_DEMO} = 'on' ]; then
@@ -247,7 +253,7 @@ if [ ${SITE_DEMO} = 'on' ]; then
 
   docker exec -i ctc-mysql bash <<'EOF'
 
-    gunzip < /var/lib/mysql/demo.sql.gz | mysql -u"${MYSQL_USER}" -p"${MYSQL_PASSWORD}" "${MYSQL_DATABASE}"
+    gunzip < /var/lib/mysql/demo.sql.gz | mysql -u ${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_DATABASE}
 
   exit
 
