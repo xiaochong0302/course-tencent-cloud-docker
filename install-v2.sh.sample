@@ -223,10 +223,6 @@ if [ -z "$(command -v docker-compose)" ]; then
   exit 1
 fi
 
-#设置ctc目录权限
-chown -R www-data:www-data ${ctc_dir}
-chmod -R 775 ${ctc_dir}
-
 #mysql日志目录
 mysql_log_dir=${base_dir}/mysql/log
 
@@ -279,7 +275,12 @@ normal_print "------ build docker images ------"
 
 docker-compose up -d
 
-#等待MySQL启动
+ctc_dir=/var/www/html/ctc
+
+#统一ctc目录权限
+chown -R www-data:www-data ${ctc_dir}
+
+#判断mysql容器是否已经启动成功
 docker exec -i ctc-php bash <<'EOF'
 
 until nc -z -v -w30 mysql 3306 &> /dev/null
