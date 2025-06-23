@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 # ----------- 请根据实际情况，修改如下配置 ------------ #
 
 #是否安装测试数据(on:是，off:否)
@@ -8,37 +10,7 @@ SITE_DEMO=off
 #站点域名(不包括http)
 SITE_DOMAIN=abc.com
 
-#mysql超级用户密码（数字字母组合，不要用特殊字符）
-MYSQL_ROOT_PASSWORD=1qaz2wsx3edc
-
-#mysql主机名称（非独立实例请不要修改，独立实例填写主机IP）
-MYSQL_HOST=mysql
-
-#mysql主机端口（非独立实例请不要修改）
-MYSQL_PORT=3306
-
-#mysql项目数据库名称（数字字母组合，不要用特殊字符）
-MYSQL_DATABASE=ctc
-
-#mysql项目数据库用户（数字字母组合，不要用特殊字符）
-MYSQL_USER=ctc
-
-#mysql项目数据库密码（数字字母组合，不要用特殊字符）
-MYSQL_PASSWORD=1qaz2wsx3edc
-
-#redis主机名称（非独立实例请不要修改，独立实例填写主机IP）
-REDIS_HOST=redis
-
-#redis访问密码（数字字母组合，不要用特殊字符）
-REDIS_PASSWORD=1qaz2wsx3edc
-
 # ------------ @@@ 以下内容，非专业人士请勿修改，新手请远离！ @@@ ------------- #
-
-#基准目录
-base_dir=~/ctc-docker
-
-#ctc目录
-ctc_dir=${base_dir}/html/ctc
 
 #普通信息输出
 normal_print() {
@@ -55,19 +27,97 @@ error_print() {
   echo -e "\033[31m \n $1 \n \033[0m"
 }
 
+#生成随机字符串
+random_str() {
+  local length=$1
+  if [ -z "$length" ]; then
+    length=16
+  fi
+  tr -dc 'a-zA-Z0-9' </dev/urandom | fold -w "$length" | head -n 1
+}
+
 #系统判断
 os_type() {
-  os=$(grep "^ID=" /etc/os-release)
-  if [[ ${os} =~ 'centos' ]]; then
-    echo 'centos'
-  elif [[ ${os} =~ 'ubuntu' ]]; then
-    echo 'ubuntu'
-  elif [[ ${os} =~ 'debian' ]]; then
-    echo 'debian'
+  if [ ! -f /etc/os-release ]; then
+    echo "other"
+    return 1
+  fi
+
+  # 获取ID和ID_LIKE（去除引号）
+  local os_id os_like
+  os_id=$(grep '^ID=' /etc/os-release | cut -d= -f2 | tr -d '"')
+  os_like=$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2 | tr -d '"')
+
+  # 主判断逻辑
+  if [[ "$os_id" == "centos" || "$os_id" == "rhel" || "$os_id" == "almalinux" || "$os_id" == "rocky" || "$os_id" == "ol" ]]; then
+    echo "rhel" # 统一返回RHEL兼容系
+  elif [[ "$os_id" == "ubuntu" ]]; then
+    echo "ubuntu"
+  elif [[ "$os_id" == "debian" ]]; then
+    echo "debian"
+  elif [[ "$os_id" == "opensuse-leap" || "$os_id" == "sles" ]]; then
+    echo "suse"
   else
-    echo 'other'
+    # 处理衍生版（通过ID_LIKE判断）
+    if [[ "$os_like" == *"rhel"* || "$os_like" == *"centos"* || "$os_like" == *"fedora"* ]]; then
+      echo "rhel"
+    elif [[ "$os_like" == *"suse"* ]]; then
+      echo "suse"
+    elif [[ "$os_like" == *"debian"* ]]; then
+      echo "debian"
+    else
+      echo "other"
+    fi
   fi
 }
+
+#mysql超级用户密码（数字字母组合，不要用特殊字符）
+MYSQL_ROOT_PASSWORD=$(random_str 16)
+
+#mysql主机名称（非独立实例请不要修改，独立实例填写主机IP）
+MYSQL_HOST=mysql
+
+#mysql主机端口（非独立实例请不要修改）
+MYSQL_PORT=3306
+
+#mysql项目数据库名称（数字字母组合，不要用特殊字符）
+MYSQL_DATABASE=ctc
+
+#mysql项目数据库用户（数字字母组合，不要用特殊字符）
+MYSQL_USER=ctc
+
+#mysql项目数据库密码（数字字母组合，不要用特殊字符）
+MYSQL_PASSWORD=$(random_str 16)
+
+#redis主机名称（非独立实例请不要修改，独立实例填写主机IP）
+REDIS_HOST=redis
+
+#redis访问密码（数字字母组合，不要用特殊字符）
+REDIS_PASSWORD=$(random_str 16)
+
+#基准目录
+base_dir=~/ctc-docker
+
+#ctc目录
+ctc_dir=${base_dir}/html/ctc
+
+#解析参数
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+  --demo)
+    SITE_DEMO="$2"
+    shift 2
+    ;;
+  --domain)
+    SITE_DOMAIN="$2"
+    shift 2
+    ;;
+  *)
+    echo "unknown param: $1" >&2
+    exit 1
+    ;;
+  esac
+done
 
 #判断root用户
 if [[ $EUID -ne 0 ]]; then
@@ -77,19 +127,34 @@ fi
 
 #判断系统架构
 if [[ "$(uname -m)" != "x86_64" ]]; then
-    error_print "------ we only support x86_64 architecture currently ------"
-    exit 1
+  error_print "------ we only support x86_64 architecture currently ------"
+  exit 1
 fi
 
 normal_print "------ update host system ------"
 
+os=$(os_type) || {
+  error_print "failed to detect OS type"
+  exit 1
+}
+
 #安装git和curl
-if [ "$(os_type)" = 'ubuntu' ] || [ "$(os_type)" = 'debian' ]; then
-  sudo apt-get update && apt-get install -y curl git
-elif [ "$(os_type)" = 'centos' ]; then
-  sudo yum update && yum install -y curl git
+if [ "${os}" = 'ubuntu' ] || [ "${os}" = 'debian' ]; then
+  apt-get update
+  apt-get install -y curl git
+elif [ "${os}" = 'rhel' ]; then
+  if [ -z "$(command -v dnf)" ]; then
+    yum update
+    yum install -y curl git
+  else
+    dnf update
+    dnf install -y curl git
+  fi
+elif [ "${os}" = 'suse' ]; then
+  zypper refresh
+  zypper install -y curl git
 else
-  error_print "------ we only support (ubuntu|debian|centos) currently ------"
+  error_print "unsupported OS: ${os} (we only support ubuntu|debian|rhel|suse)"
   exit 1
 fi
 
@@ -145,7 +210,7 @@ ctc_config_php=${ctc_config_dir}/config.php
 cp ${ctc_config_dir}/config.default.php ${ctc_config_php}
 
 #生成随机站点密钥
-site_key=$(tr -dc 'a-zA-Z0-9' < /dev/urandom | fold -w 32 | head -n 1)
+site_key=$(random_str 16)
 
 #替换config.php配置项
 sed -i "s/\$config\['key'\].*/\$config['key'] = '${site_key}';/g" ${ctc_config_php}
@@ -167,7 +232,7 @@ normal_print "------ install docker ------"
 
 #安装docker
 if [ -z "$(command -v docker)" ]; then
-  sudo bash ${base_dir}/get-docker.sh --mirror Aliyun
+  bash ${base_dir}/get-docker.sh --mirror Aliyun
 fi
 
 if [ -z "$(command -v docker)" ]; then
@@ -176,7 +241,7 @@ if [ -z "$(command -v docker)" ]; then
 fi
 
 if [ ! -d '/etc/docker' ]; then
-  sudo mkdir -p '/etc/docker'
+  mkdir -p '/etc/docker'
 fi
 
 #docker镜像加速
@@ -193,9 +258,9 @@ if [ ! -e '/etc/docker/daemon.json' ]; then
   }
 }
 EOF
-  sudo systemctl daemon-reload
-  sudo systemctl restart docker
-  sudo chmod 666 /var/run/docker.sock
+  systemctl daemon-reload
+  systemctl restart docker
+  chmod 666 /var/run/docker.sock
 fi
 
 normal_print "------ install docker-compose ------"
@@ -204,8 +269,8 @@ docker_compose_url="https://download.koogua.com/docker-compose-linux-x86_64"
 
 #安装docker-compose
 if [ -z "$(command -v docker-compose)" ]; then
-  sudo curl --retry 3 --retry-delay 5 --retry-max-time 30 "${docker_compose_url}" -o /usr/local/bin/docker-compose
-  sudo chmod +x /usr/local/bin/docker-compose
+  curl --retry 3 --retry-delay 5 --retry-max-time 30 "${docker_compose_url}" -o /usr/local/bin/docker-compose
+  chmod +x /usr/local/bin/docker-compose
 fi
 
 if [ -z "$(command -v docker-compose)" ]; then
@@ -213,11 +278,15 @@ if [ -z "$(command -v docker-compose)" ]; then
   exit 1
 fi
 
+#设置ctc目录权限
+chown -R 33:33 ${ctc_dir}
+chmod -R 755 ${ctc_dir}
+
 #mysql日志目录
 mysql_log_dir=${base_dir}/mysql/log
 
 #修改mysql日志目录的属主，否则启动不了
-sudo chown -R 999:999 ${mysql_log_dir}
+chown -R 999:999 ${mysql_log_dir}
 
 #切换到基准目录
 cd ${base_dir} || exit
@@ -239,7 +308,7 @@ exit
 EOF
 
 #导入测试数据
-if [ ${SITE_DEMO} = 'on' ]; then
+if [ "${SITE_DEMO}" = 'on' ]; then
 
   demo_sql=${base_dir}/mysql/data/demo.sql.gz
 
@@ -249,7 +318,7 @@ if [ ${SITE_DEMO} = 'on' ]; then
 
   docker exec -i ctc-mysql bash <<'EOF'
 
-    gunzip < /var/lib/mysql/demo.sql.gz | mysql -u ${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_DATABASE}
+  gunzip < /var/lib/mysql/demo.sql.gz | mysql -u ${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_DATABASE}
 
   exit
 
@@ -265,10 +334,6 @@ normal_print "------ ctc upgrade ------"
 docker exec -i --user www-data:www-data ctc-php bash <<'EOF'
 
 ctc_dir=/var/www/html/ctc
-
-#设置ctc目录权限
-chown -R www-data:www-data ${ctc_dir}
-chmod -R 755 ${ctc_dir}
 
 #切换到ctc目录
 cd ${ctc_dir}
@@ -296,7 +361,7 @@ php console.php course_index rebuild
 php console.php article_index rebuild
 php console.php question_index rebuild
 
-#清理log（之前步骤以root身份产生日志会让www-data用户无写入权限）
+#清理log
 rm -f storage/log/*.log
 
 exit

@@ -32,15 +32,36 @@ error_print() {
 
 #系统判断
 os_type() {
-  os=$(grep "^ID=" /etc/os-release)
-  if [[ ${os} =~ 'centos' ]]; then
-    echo 'centos'
-  elif [[ ${os} =~ 'ubuntu' ]]; then
-    echo 'ubuntu'
-  elif [[ ${os} =~ 'debian' ]]; then
-    echo 'debian'
+  if [ ! -f /etc/os-release ]; then
+    echo "other"
+    return 1
+  fi
+
+  # 获取ID和ID_LIKE（去除引号）
+  local os_id os_like
+  os_id=$(grep '^ID=' /etc/os-release | cut -d= -f2 | tr -d '"')
+  os_like=$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2 | tr -d '"')
+
+  # 主判断逻辑
+  if [[ "$os_id" == "centos" || "$os_id" == "rhel" || "$os_id" == "almalinux" || "$os_id" == "rocky" || "$os_id" == "ol" ]]; then
+    echo "rhel" # 统一返回RHEL兼容系
+  elif [[ "$os_id" == "ubuntu" ]]; then
+    echo "ubuntu"
+  elif [[ "$os_id" == "debian" ]]; then
+    echo "debian"
+  elif [[ "$os_id" == "opensuse-leap" || "$os_id" == "sles" ]]; then
+    echo "suse"
   else
-    echo 'other'
+    # 处理衍生版（通过ID_LIKE判断）
+    if [[ "$os_like" == *"rhel"* || "$os_like" == *"centos"* || "$os_like" == *"fedora"* ]]; then
+      echo "rhel"
+    elif [[ "$os_like" == *"suse"* ]]; then
+      echo "suse"
+    elif [[ "$os_like" == *"debian"* ]]; then
+      echo "debian"
+    else
+      echo "other"
+    fi
   fi
 }
 
@@ -58,22 +79,37 @@ fi
 
 normal_print "------ update host system ------"
 
+os=$(os_type) || {
+  error_print "failed to detect OS type"
+  exit 1
+}
+
 #安装git和curl
-if [ "$(os_type)" = 'ubuntu' ] || [ "$(os_type)" = 'debian' ]; then
-  sudo apt-get update && apt-get install -y curl git
-elif [ "$(os_type)" = 'centos' ]; then
-  sudo yum update && yum install -y curl git
+if [ "${os}" = 'ubuntu' ] || [ "${os}" = 'debian' ]; then
+  apt-get update
+  apt-get install -y curl git
+elif [ "${os}" = 'rhel' ]; then
+  if [ -z "$(command -v dnf)" ]; then
+    yum update
+    yum install -y curl git
+  else
+    dnf update
+    dnf install -y curl git
+  fi
+elif [ "${os}" = 'suse' ]; then
+  zypper refresh
+  zypper install -y curl git
 else
-  error_print "------ we only support (ubuntu|debian|centos) currently ------"
+  error_print "unsupported OS: ${os} (we only support ubuntu|debian|rhel|suse)"
   exit 1
 fi
 
 if [ ! -e ${ctc_docker_tar} ]; then
-  error_print "------ error: ctc-docker.tar.gz not found ------"
+  error_print "------ ctc-docker.tar.gz not found ------"
   exit 1
 fi
 
-normal_print "------ tar -xzf ctc-docker.tar.gz ------"
+normal_print "------ extract ctc-docker.tar.gz ------"
 
 #解压ctc-docker.tar.gz
 cd ${base_dir} && tar -xzf ${site_name}.tar.gz
@@ -85,7 +121,7 @@ normal_print "------ install docker ------"
 
 #安装docker
 if [ -z "$(command -v docker)" ]; then
-  sudo bash ${ctc_docker_dir}/get-docker.sh --mirror Aliyun
+  bash ${ctc_docker_dir}/get-docker.sh --mirror Aliyun
 fi
 
 if [ -z "$(command -v docker)" ]; then
@@ -94,7 +130,7 @@ if [ -z "$(command -v docker)" ]; then
 fi
 
 if [ ! -d '/etc/docker' ]; then
-  sudo mkdir -p '/etc/docker'
+  mkdir -p '/etc/docker'
 fi
 
 #docker镜像加速
@@ -111,9 +147,9 @@ if [ ! -e '/etc/docker/daemon.json' ]; then
   }
 }
 EOF
-  sudo systemctl daemon-reload
-  sudo systemctl restart docker
-  sudo chmod 666 /var/run/docker.sock
+  systemctl daemon-reload
+  systemctl restart docker
+  chmod 666 /var/run/docker.sock
 fi
 
 normal_print "------ install docker-compose ------"
@@ -122,8 +158,8 @@ docker_compose_url="https://download.koogua.com/docker-compose-linux-x86_64"
 
 #安装docker-compose
 if [ -z "$(command -v docker-compose)" ]; then
-  sudo curl --retry 3 --retry-delay 5 --retry-max-time 30 "${docker_compose_url}" -o /usr/local/bin/docker-compose
-  sudo chmod +x /usr/local/bin/docker-compose
+  curl --retry 3 --retry-delay 5 --retry-max-time 30 "${docker_compose_url}" -o /usr/local/bin/docker-compose
+  chmod +x /usr/local/bin/docker-compose
 fi
 
 if [ -z "$(command -v docker-compose)" ]; then
