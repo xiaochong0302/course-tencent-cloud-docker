@@ -181,13 +181,18 @@ normal_print "------ git clone ctc ------"
 
 #克隆ctc项目
 if [ ! -d ${ctc_dir} ]; then
+
   git clone --depth 1 https://gitee.com/koogua/course-tencent-cloud.git ${ctc_dir}
+
+  #忽略文件模式（权限）变更
+  git config --global core.fileMode false
+
+  #加入安全目录
+  git config --global --add safe.directory ${ctc_dir}
+
 else
   cd ${ctc_dir} && git pull --no-rebase
 fi
-
-#加入git安全目录
-git config --global --add safe.directory ${ctc_dir}
 
 #docker .env文件
 docker_env=${base_dir}/.env
@@ -288,9 +293,8 @@ if [ -z "$(command -v docker-compose)" ]; then
   exit 1
 fi
 
-#设置ctc目录权限
+#设置ctc目录属主
 chown -R 33:33 ${ctc_dir}
-chmod -R 755 ${ctc_dir}
 
 #mysql日志目录
 mysql_log_dir=${base_dir}/mysql/log

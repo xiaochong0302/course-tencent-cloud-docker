@@ -114,7 +114,10 @@ normal_print "------ extract ctc-docker.tar.gz ------"
 #解压ctc-docker.tar.gz
 cd ${base_dir} && tar -xzf ${site_name}.tar.gz
 
-#加入git安全目录
+#忽略文件模式（权限）变更
+git config --global core.fileMode false
+
+#加入安全目录
 git config --global --add safe.directory ${ctc_html_dir}
 
 normal_print "------ install docker ------"
