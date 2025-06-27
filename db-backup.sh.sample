@@ -15,16 +15,15 @@ LOCAL_DIR=/root/ctc-docker/mysql/data/backup
 #远程目录（绝对路径，末尾不带"/"）
 REMOTE_DIR=/backup/database
 
+#导出环境变量
+if [ -f .env ]; then
+  export $(grep -v '^#' .env | xargs)
+else
+  echo "error: .env file not found"
+  exit 1
+fi
+
 docker exec -i ctc-mysql bash <<'EOF'
-
-#数据库名称
-DB_NAME=ctc
-
-#数据库用户
-DB_USER=ctc
-
-#数据库密码
-DB_PWD=1qaz2wsx3edc
 
 #备份目录（末尾不带"/"）
 backup_dir=/var/lib/mysql/backup
@@ -35,7 +34,7 @@ if [ ! -d ${backup_dir} ]; then
 fi
 
 #导出数据
-mysqldump --no-tablespaces -u ${DB_USER} -p${DB_PWD} ${DB_NAME} | gzip > ${backup_dir}/${DB_NAME}-$(date +%Y-%m-%d).sql.gz
+mysqldump --no-tablespaces -u ${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_DATABASE} | gzip > ${backup_dir}/${MYSQL_DATABASE}-$(date +%Y-%m-%d).sql.gz
 
 exit
 EOF
