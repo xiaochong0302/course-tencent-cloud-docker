@@ -9,6 +9,9 @@ COS_CMD=/usr/local/bin/coscmd
 #COS配置文件路径（绝对路径）
 COS_CONF_PATH=/root/.cos.conf
 
+#env文件路径（绝对路径）
+ENV_FILE=/root/ctc-docker/.env
+
 #本地目录（绝对路径，末尾不带"/"）
 LOCAL_DIR=/root/ctc-docker/mysql/data/backup
 
@@ -16,8 +19,8 @@ LOCAL_DIR=/root/ctc-docker/mysql/data/backup
 REMOTE_DIR=/backup/database
 
 #导出环境变量
-if [ -f .env ]; then
-  export $(grep -v '^#' .env | xargs)
+if [ -f ${ENV_FILE} ]; then
+  export $(grep -v '^#' ${ENV_FILE} | xargs)
 else
   echo "error: .env file not found"
   exit 1
