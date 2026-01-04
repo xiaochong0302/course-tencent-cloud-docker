@@ -73,8 +73,8 @@ fi
 
 #判断系统架构
 if [[ "$(uname -m)" != "x86_64" ]]; then
-    error_print "------ we only support x86_64 architecture currently ------"
-    exit 1
+  error_print "------ we only support x86_64 architecture currently ------"
+  exit 1
 fi
 
 normal_print "------ update host system ------"
@@ -116,6 +116,7 @@ cd ${base_dir} && tar -xzf ${site_name}.tar.gz
 
 #忽略文件模式（权限）变更
 git config --global core.fileMode false
+git config --global core.autocrlf false
 
 #加入安全目录
 git config --global --add safe.directory ${ctc_html_dir}

@@ -182,10 +182,11 @@ normal_print "------ git clone ctc ------"
 #克隆ctc项目
 if [ ! -d ${ctc_dir} ]; then
 
-  git clone --depth 1 https://gitee.com/koogua/course-tencent-cloud.git ${ctc_dir}
-
   #忽略文件模式（权限）变更
   git config --global core.fileMode false
+  git config --global core.autocrlf false
+
+  git clone --depth 1 https://gitee.com/koogua/course-tencent-cloud.git ${ctc_dir}
 
   #加入安全目录
   git config --global --add safe.directory ${ctc_dir}
