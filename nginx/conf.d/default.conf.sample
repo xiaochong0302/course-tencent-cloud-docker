@@ -37,6 +37,7 @@ server {
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         fastcgi_param HTTP_X_FORWARDED_FOR $proxy_add_x_forwarded_for;
         fastcgi_param REMOTE_ADDR $remote_addr;
+        fastcgi_param HTTP_HOST $http_host;
     }
 
     location ~ /\.(ht|git) {
