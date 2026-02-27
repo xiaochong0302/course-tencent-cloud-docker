@@ -99,6 +99,9 @@ MYSQL_USER=ctc
 #mysql项目数据库密码（数字字母组合，不要用特殊字符）
 MYSQL_PASSWORD=$(random_str 16)
 
+#MySQL用户ID（官方镜像默认为999）
+MYSQL_UID=999
+
 #redis主机名称（非独立实例请不要修改，独立实例填写主机IP）
 REDIS_HOST=redis
 
@@ -279,29 +282,14 @@ EOF
   chmod 666 /var/run/docker.sock
 fi
 
-normal_print "------ install docker-compose ------"
-
-docker_compose_url="https://download.koogua.com/docker-compose-linux-x86_64"
-
-#安装docker-compose
-if [ -z "$(command -v docker-compose)" ]; then
-  curl --retry 3 --retry-delay 5 --retry-max-time 30 "${docker_compose_url}" -o /usr/local/bin/docker-compose
-  chmod +x /usr/local/bin/docker-compose
-fi
-
-if [ -z "$(command -v docker-compose)" ]; then
-  error_print "------ docker-compose command not found, please try again ------"
-  exit 1
-fi
-
 #设置ctc目录属主
-chown -R 33:33 ${ctc_dir}
+chown -R www-data:www-data ${ctc_dir}
 
 #mysql日志目录
 mysql_log_dir=${base_dir}/mysql/log
 
 #修改mysql日志目录的属主，否则启动不了
-chown -R 999:999 ${mysql_log_dir}
+chown -R ${MYSQL_UID}:${MYSQL_UID} ${mysql_log_dir}
 
 #切换到基准目录
 cd ${base_dir} || exit
@@ -347,7 +335,7 @@ fi
 
 normal_print "------ build docker images ------"
 
-docker-compose up -d
+docker compose up -d
 
 #等待mysql服务
 docker exec -i ctc-php bash <<'EOF'
