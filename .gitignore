@@ -1,0 +1,13 @@
+/.idea
+/.env
+/html
+/install.sh
+/install-v2.sh
+/upgrade.sh
+/static.sh
+/db-backup.sh
+/site-acme.sh
+/site-backup.sh
+/site-restore.sh
+/nginx/conf.d/default.conf
+/nginx/conf.d/ssl-default.conf

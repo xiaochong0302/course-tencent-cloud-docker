@@ -1,0 +1,643 @@
+#!/usr/bin/env bash
+
+set -e
+
+#----------- 请根据实际情况，修改如下配置 ------------#
+
+#是否安装测试数据（on:是，off:否）
+SITE_DEMO=off
+
+#站点域名（不包括http, 例如: ctc.koogua.com）
+SITE_DOMAIN=
+
+#------------ @@@ 以下内容，非专业人士请勿修改，新手请远离！ @@@ -------------#
+
+#普通信息输出
+normal_print() {
+  echo -e "\033[34m \n $1 \n \033[0m"
+}
+
+#成功信息输出
+success_print() {
+  echo -e "\033[32m \n $1 \n \033[0m"
+}
+
+#失败信息输出
+error_print() {
+  echo -e "\033[31m \n $1 \n \033[0m"
+}
+
+#生成随机字符串
+random_str() {
+  local length=$1
+  if [ -z "$length" ]; then
+    length=16
+  fi
+  tr -dc 'a-zA-Z0-9' </dev/urandom | fold -w "$length" | head -n 1
+}
+
+#系统类型检测
+os_type() {
+  if [ ! -f /etc/os-release ]; then
+    echo "other"
+    return 1
+  fi
+
+  local os_id os_like
+  os_id=$(grep '^ID=' /etc/os-release | cut -d= -f2 | tr -d '"')
+  os_like=$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2 | tr -d '"')
+
+  case "$os_id" in
+    centos|rhel|almalinux|rocky|ol)
+      echo "rhel"
+      ;;
+    ubuntu)
+      echo "ubuntu"
+      ;;
+    debian)
+      echo "debian"
+      ;;
+    opensuse-leap|sles)
+      echo "suse"
+      ;;
+    alpine)
+      echo "alpine"
+      ;;
+    *)
+    #衍生版处理
+    if [[ "$os_like" =~ (rhel|centos|fedora) ]]; then
+      echo "rhel"
+    elif [[ "$os_like" =~ suse ]]; then
+      echo "suse"
+    elif [[ "$os_like" =~ debian ]]; then
+      echo "debian"
+    else
+      echo "other"
+    fi
+    ;;
+  esac
+}
+
+#检查用户
+check_root() {
+  if [[ $EUID -ne 0 ]]; then
+    error_print "this script must run with root user"
+    exit 1
+  fi
+}
+
+#判断系统架构
+check_arch() {
+  local arch
+  arch=$(uname -m)
+  if [[ "${arch}" != "x86_64" && "${arch}" != "aarch64" ]]; then
+    error_print "only support x86_64/aarch64, your arch: ${arch}"
+    exit 1
+  fi
+  normal_print "system arch: ${arch}"
+}
+
+#获取nologin路径
+get_nologin_path() {
+  if command -v nologin &>/dev/null; then
+    which nologin
+  elif [ -f /usr/sbin/nologin ]; then
+    echo "/usr/sbin/nologin"
+  elif [ -f /sbin/nologin ]; then
+    echo "/sbin/nologin"
+  elif [ -f /bin/nologin ]; then
+    echo "/bin/nologin"
+  else
+    echo "/bin/false"
+  fi
+}
+
+#创建www-data用户
+create_www_data_user() {
+  local nologin_path
+  nologin_path=$(get_nologin_path)
+
+  normal_print "------ configuring www-data user ------"
+
+  if ! id -u www-data &>/dev/null; then
+    #用户不存在：先确保组存在，再创建用户
+    if ! getent group www-data &>/dev/null; then
+      groupadd -g 33 www-data || {
+        error_print "------ failed to create group www-data ------"
+        exit 1
+      }
+    fi
+
+    useradd -r -u 33 -g www-data -s "${nologin_path}" www-data || {
+      error_print "------ failed to create www-data user ------"
+      exit 1
+    }
+
+    success_print "------ www-data user created successfully ------"
+
+  else
+
+    #用户已存在：检查并修正 UID:GID
+    local current_uid current_gid
+    current_uid=$(id -u www-data)
+    current_gid=$(id -g www-data)
+
+    if [ "${current_uid}" = "33" ] && [ "${current_gid}" = "33" ]; then
+      success_print "------ www-data user already exists with correct UID:GID (33:33) ------"
+    else
+      normal_print "------ www-data user exists with UID:${current_uid} GID:${current_gid}, attempting to fix ------"
+      usermod -u 33 -g 33 www-data || {
+        error_print "------ failed to modify www-data UID:GID (manual intervention required) ------"
+        exit 1
+      }
+      success_print "------ www-data user UID:GID synced to 33:33 ------"
+    fi
+  fi
+}
+
+#参数解析
+parse_args() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --demo)
+        SITE_DEMO="$2"
+        shift 2
+        ;;
+      --domain)
+        SITE_DOMAIN="$2"
+        shift 2
+        ;;
+      *)
+        error_print "unknown param: $1"
+        exit 1
+        ;;
+    esac
+  done
+
+  #检查--domain参数
+  if [ -z "${SITE_DOMAIN}" ]; then
+    error_print "--domain param is required"
+    exit 1
+  fi
+}
+
+#安装依赖包
+install_packages() {
+  local os=$1
+
+  normal_print "------ install git and other dependencies ------ "
+
+  case "${os}" in
+    ubuntu|debian)
+      apt-get update -qq
+      apt-get install -y -qq curl git netcat-openbsd
+      ;;
+    rhel)
+      if command -v dnf &>/dev/null; then
+        dnf install -y curl git nmap-ncat
+      else
+        yum install -y curl git nmap-ncat
+      fi
+      ;;
+    suse)
+      zypper install -y curl git netcat-openbsd
+      ;;
+    alpine)
+      apk add --no-cache curl git netcat-openbsd bash
+      ;;
+    *)
+      error_print "unsupported OS: ${os}"
+      return 1
+      ;;
+  esac
+}
+
+#安装docker
+install_docker() {
+  local get_docker_sh=$1
+
+  normal_print "------ install docker ------"
+
+  #安装docker
+  if [ -z "$(command -v docker)" ]; then
+    bash "${get_docker_sh}" --mirror Aliyun
+  fi
+
+  if [ -z "$(command -v docker)" ]; then
+    error_print "------ error: docker command not found, please try again ------"
+    exit 1
+  fi
+}
+
+#配置docker
+configure_docker() {
+  normal_print "------ configure docker ------"
+
+  if [ ! -d /etc/docker ]; then
+    mkdir -p /etc/docker
+  fi
+
+  if [ ! -f /etc/docker/daemon.json ]; then
+    cat > /etc/docker/daemon.json <<'EOF'
+{
+  "registry-mirrors": [
+    "https://mirror.ccs.tencentyun.com",
+    "https://docker.1ms.run"
+  ],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "500m",
+    "max-file": "3"
+  },
+  "storage-driver": "overlay2"
+}
+EOF
+    systemctl daemon-reload
+    systemctl restart docker
+  fi
+}
+
+#克隆项目
+clone_projects() {
+  local base_dir=$1
+  local ctc_dir=$2
+
+  normal_print "------ git clone ctc-v2-docker ------"
+
+  #克隆ctc-v2-docker项目
+  if [ ! -d "${base_dir}" ]; then
+    git clone --branch v2 --depth 1 https://gitee.com/koogua/course-tencent-cloud-docker.git "${base_dir}"
+  else
+    cd "${base_dir}" && git pull --no-rebase
+  fi
+
+  normal_print "------ git clone ctc-v2 ------"
+
+  #克隆ctc-v2项目
+  if [ ! -d "${ctc_dir}" ]; then
+
+    #忽略文件模式（权限）变更
+    git config --global core.fileMode false
+    git config --global core.autocrlf false
+
+    git clone --branch v2 --depth 1 https://gitee.com/koogua/course-tencent-cloud.git "${ctc_dir}"
+
+    #加入安全目录
+    git config --global --add safe.directory "${ctc_dir}"
+
+  else
+    cd "${ctc_dir}" && git pull --no-rebase
+  fi
+}
+
+#初始化环境变量
+init_env_variables() {
+  local base_dir=$1
+
+  normal_print "------ initialize environment variables ------"
+
+  local docker_env=${base_dir}/.env
+
+  #创建.env文件
+  if [ ! -f "${docker_env}" ]; then
+    cp "${base_dir}/.env.default" "${docker_env}"
+  fi
+
+  #加载环境变量
+  set -a
+  #shellcheck source=/dev/null
+  source "${docker_env}"
+  set +a
+
+  #生成缺失的密码
+  if [ -z "${MYSQL_ROOT_PASSWORD}" ]; then
+    MYSQL_ROOT_PASSWORD=$(random_str 16)
+  fi
+
+  if [ -z "${MYSQL_PASSWORD}" ]; then
+    MYSQL_PASSWORD=$(random_str 16)
+  fi
+
+  if [ -z "${REDIS_PASSWORD}" ]; then
+    REDIS_PASSWORD=$(random_str 16)
+  fi
+
+  #替换docker .env配置项
+  sed -i "s/MYSQL_ROOT_PASSWORD.*/MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}/g" "${docker_env}"
+  sed -i "s/MYSQL_DATABASE.*/MYSQL_DATABASE=${MYSQL_DATABASE}/g" "${docker_env}"
+  sed -i "s/MYSQL_USER.*/MYSQL_USER=${MYSQL_USER}/g" "${docker_env}"
+  sed -i "s/MYSQL_PASSWORD.*/MYSQL_PASSWORD=${MYSQL_PASSWORD}/g" "${docker_env}"
+  sed -i "s/REDIS_PASSWORD.*/REDIS_PASSWORD=${REDIS_PASSWORD}/g" "${docker_env}"
+}
+
+#配置nginx
+configure_nginx() {
+  local base_dir=$1
+  local site_domain=$2
+
+  normal_print "------ configure nginx ------"
+
+  local nginx_conf_dir=${base_dir}/nginx/conf.d
+  local nginx_default_conf=${nginx_conf_dir}/default.conf
+
+  #复制nginx站点配置文件
+  cp "${nginx_conf_dir}/default.conf.sample" "${nginx_default_conf}"
+
+  #替换nginx default.conf配置项
+  sed -i "s/server_name .*/server_name ${site_domain};/g" "${nginx_default_conf}"
+}
+
+#配置应用
+configure_application() {
+  local ctc_dir=$1
+  local mysql_host=$2
+  local mysql_port=$3
+  local mysql_database=$4
+  local mysql_user=$5
+  local mysql_password=$6
+  local redis_host=$7
+  local redis_password=$8
+  local site_domain=$9
+
+  normal_print "------ configure application ------"
+
+  local ctc_config_dir=${ctc_dir}/config
+  local ctc_config_php=${ctc_config_dir}/config.php
+
+  #复制config.php
+  cp "${ctc_config_dir}/config.default.php" "${ctc_config_php}"
+
+  #生成随机站点密钥
+  local site_key
+  site_key=$(random_str 16)
+
+  #替换config.php配置项
+  sed -i "s/\$config\['key'\].*/\$config['key'] = '${site_key}';/g" "${ctc_config_php}"
+  sed -i "s/\$config\['db'\]\['host'\].*/\$config['db']['host'] = '${mysql_host}';/g" "${ctc_config_php}"
+  sed -i "s/\$config\['db'\]\['port'\].*/\$config['db']['port'] = '${mysql_port}';/g" "${ctc_config_php}"
+  sed -i "s/\$config\['db'\]\['dbname'\].*/\$config['db']['dbname'] = '${mysql_database}';/g" "${ctc_config_php}"
+  sed -i "s/\$config\['db'\]\['username'\].*/\$config['db']['username'] = '${mysql_user}';/g" "${ctc_config_php}"
+  sed -i "s/\$config\['db'\]\['password'\].*/\$config['db']['password'] = '${mysql_password}';/g" "${ctc_config_php}"
+  sed -i "s/\$config\['redis'\]\['host'\].*/\$config['redis']['host'] = '${redis_host}';/g" "${ctc_config_php}"
+  sed -i "s/\$config\['redis'\]\['auth'\].*/\$config['redis']['auth'] = '${redis_password}';/g" "${ctc_config_php}"
+}
+
+#复制xunsearch配置文件
+copy_xunsearch_config() {
+  local ctc_dir=$1
+
+  normal_print "------ copy xunsearch config ------"
+
+  local ctc_config_dir=${ctc_dir}/config
+
+  cp "${ctc_config_dir}/xs.course.default.ini" "${ctc_config_dir}/xs.course.ini"
+  cp "${ctc_config_dir}/xs.chapter.default.ini" "${ctc_config_dir}/xs.chapter.ini"
+}
+
+#设置目录权限
+setup_directory_permissions() {
+  local base_dir=$1
+  local ctc_dir=$2
+  local mysql_uid=$3
+  local redis_uid=$4
+
+  normal_print "------ setup directory permissions ------"
+
+  #设置ctc目录属主
+  chown -R www-data:www-data "${ctc_dir}"
+
+  #修改mysql数据目录属主
+  chown -R "${mysql_uid}:${mysql_uid}" "${base_dir}/mysql/data" "${base_dir}/mysql/log"
+
+  #修改redis数据目录属主
+  chown -R "${redis_uid}:${redis_uid}" "${base_dir}/redis/data"
+}
+
+#启动docker服务
+start_docker_services() {
+  local base_dir=$1
+
+  normal_print "------ start docker services ------"
+
+  cd "${base_dir}" || exit
+
+  docker compose up -d
+}
+
+#等待mysql服务
+wait_mysql_service() {
+  normal_print "------ waiting for mysql service ------"
+
+  docker exec -i ctc-php bash <<'EOF'
+
+until nc -z -v -w30 mysql 3306 &> /dev/null
+do
+  echo "waiting for mysql service..."
+  sleep 5
+done
+
+exit
+EOF
+}
+
+#导入测试数据
+import_demo_data() {
+  local base_dir=$1
+  local mysql_user=$2
+  local mysql_password=$3
+  local mysql_database=$4
+
+  demo_sql_gz=${base_dir}/mysql/data/demo.sql.gz
+
+  normal_print "------ import demo data ------"
+
+  curl --retry 3 --retry-delay 5 --retry-max-time 30 https://download.koogua.com/ctc-v2/demo.sql.gz -o "${demo_sql_gz}"
+
+  docker exec -i ctc-mysql bash <<EOF
+
+  gunzip < /var/lib/mysql/demo.sql.gz | mysql -u ${mysql_user} -p${mysql_password} ${mysql_database}
+
+  exit
+
+EOF
+
+  rm -f "${demo_sql_gz}"
+}
+
+#初始化应用
+init_application() {
+  normal_print "------ init application ------"
+
+  #使用www-data用户运行，避免权限问题
+  docker exec -i --user www-data:www-data ctc-php bash <<'EOF'
+
+ctc_dir=/var/www/html/ctc
+
+#切换到ctc目录
+cd ${ctc_dir}
+
+echo -e "\n------ install composer packages ------\n"
+
+#安装依赖包
+composer install --no-dev
+composer dump-autoload --optimize
+
+echo -e "\n------ phinx migrate ------\n"
+
+#数据迁移
+vendor/bin/phinx migrate
+
+echo -e "\n------ php console upgrade ------\n"
+
+#程序升级
+php console.php upgrade
+
+echo -e "\n------ xunsearch index rebuild ------\n"
+
+#重建xunsearch索引
+php console.php course_index rebuild
+php console.php chapter_index rebuild
+
+#清理log
+rm -f storage/log/*.log
+
+exit
+EOF
+}
+
+#重启php容器
+restart_php_container() {
+  normal_print "------ restart php container ------"
+
+  #重启php容器（websocket依赖WorkerGateway相关包，之前启动php容器时并未安装相关包）
+  docker container restart ctc-php
+}
+
+#检查服务状态
+check_services_status() {
+  normal_print "------ check services status ------"
+
+  local docker_ps
+  docker_ps=$(docker ps)
+
+  if [[ "${docker_ps}" =~ 'nginx' ]]; then
+    success_print "------ nginx service ok ------"
+  else
+    error_print "------ nginx service failed ------"
+  fi
+
+  if [[ "${docker_ps}" =~ 'php' ]]; then
+    success_print "------ php service ok ------"
+  else
+    error_print "------ php service failed ------"
+  fi
+
+  if [[ "${docker_ps}" =~ 'mysql' ]]; then
+    success_print "------ mysql service ok ------"
+  else
+    error_print "------ mysql service failed ------"
+  fi
+
+  if [[ "${docker_ps}" =~ 'redis' ]]; then
+    success_print "------ redis service ok ------"
+  else
+    error_print "------ redis service failed ------"
+  fi
+
+  if [[ "${docker_ps}" =~ 'xunsearch' ]]; then
+    success_print "------ xunsearch service ok ------"
+  else
+    error_print "------ xunsearch service failed ------"
+  fi
+}
+
+#MySQL用户ID（官方镜像默认为999）
+MYSQL_UID=999
+
+#mysql主机名称（非独立实例请不要修改，独立实例填写主机IP）
+MYSQL_HOST=mysql
+
+#mysql主机端口（非独立实例请不要修改）
+MYSQL_PORT=3306
+
+#mysql项目数据库名称（数字字母组合，不要用特殊字符）
+MYSQL_DATABASE=ctc
+
+#mysql项目数据库用户（数字字母组合，不要用特殊字符）
+MYSQL_USER=ctc
+
+#Redis用户ID（官方镜像默认为999）
+REDIS_UID=999
+
+#redis主机名称（非独立实例请不要修改，独立实例填写主机IP）
+REDIS_HOST=redis
+
+#基准目录
+base_dir=~/ctc-docker
+
+#ctc目录
+ctc_dir=${base_dir}/html/ctc
+
+#参数解析
+parse_args "$@"
+
+#检查用户
+check_root
+
+#系统类型检测
+check_arch
+
+os=$(os_type) || {
+    error_print "not support os type"
+    exit 1
+  }
+
+#安装依赖包
+install_packages "${os}"
+
+#创建www-data用户
+create_www_data_user
+
+#克隆项目
+clone_projects "${base_dir}" "${ctc_dir}"
+
+#安装docker
+install_docker "${base_dir}/get-docker.sh"
+
+#配置docker
+configure_docker
+
+#初始化环境变量
+init_env_variables "${base_dir}"
+
+#配置nginx
+configure_nginx "${base_dir}" "${SITE_DOMAIN}"
+
+#配置应用
+configure_application "${ctc_dir}" "${MYSQL_HOST}" "${MYSQL_PORT}" "${MYSQL_DATABASE}" "${MYSQL_USER}" "${MYSQL_PASSWORD}" "${REDIS_HOST}" "${REDIS_PASSWORD}" "${SITE_DOMAIN}"
+
+#复制xunsearch配置文件
+copy_xunsearch_config "${ctc_dir}"
+
+#设置目录权限
+setup_directory_permissions "${base_dir}" "${ctc_dir}" "${MYSQL_UID}" "${REDIS_UID}"
+
+#启动docker服务
+start_docker_services "${base_dir}"
+
+#等待mysql服务
+wait_mysql_service
+
+#导入测试数据
+if [ "${SITE_DEMO}" = 'on' ]; then
+  import_demo_data "${base_dir}" "${MYSQL_USER}" "${MYSQL_PASSWORD}" "${MYSQL_DATABASE}"
+fi
+
+#初始化应用
+init_application
+
+#重启php容器
+restart_php_container
+
+#检查服务状态
+check_services_status

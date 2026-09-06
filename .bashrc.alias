@@ -1,0 +1,5 @@
+alias docker_nginx="docker exec -it ctc-nginx /bin/bash"
+alias docker_php="docker exec -it ctc-php /bin/bash"
+alias docker_mysql="docker exec -it ctc-mysql /bin/bash"
+alias docker_redis="docker exec -it ctc-redis /bin/bash"
+alias docker_xunsearch="docker exec -it ctc-xunsearch /bin/bash"

@@ -1,0 +1,45 @@
+server {
+
+    listen 80;
+
+    server_name ctc.docker;
+
+    root /var/www/html/ctc/public;
+    index index.php index.html index.htm;
+    charset utf-8;
+
+    access_log /var/log/nginx/ctc.access.log;
+    error_log /var/log/nginx/ctc.error.log;
+
+    client_max_body_size 100M;
+    fastcgi_read_timeout 600;
+    fastcgi_send_timeout 600;
+
+    location / {
+        try_files $uri $uri/ /index.php?_url=$uri&$args;
+    }
+
+    location ~ \.php$ {
+
+        include fastcgi_params;
+
+        fastcgi_pass php:9000;
+        fastcgi_index /index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param HTTP_X_FORWARDED_FOR $http_x_forwarded_for;
+        fastcgi_param HTTP_X_REAL_IP $http_x_real_ip;
+        fastcgi_param HTTP_HOST $http_host;
+    }
+
+    location ~ /\.(ht|git) {
+        deny all;
+        return 403;
+    }
+
+    location ~* \.(js|css|png|jpg|jpeg|webp|gif|ico)$ {
+        expires max;
+        log_not_found off;
+        access_log off;
+    }
+
+}

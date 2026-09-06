@@ -1,0 +1,92 @@
+services:
+
+  nginx:
+    build: ./nginx
+    image: ctc/nginx:latest
+    container_name: ctc-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./html:/var/www/html
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/logrotate.sh:/etc/nginx/logrotate.sh
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./nginx/log:/var/log/nginx
+    networks:
+      - koogua
+    restart: always
+
+  php:
+    build: ./php
+    image: ctc/php:latest
+    container_name: ctc-php
+    ports:
+      - "8282:8282"
+    expose:
+      - 9000
+    volumes:
+      - ./html:/var/www/html
+      - ./php/log:/var/log/php-fpm
+      - ./php/php-fpm.d/zz-docker.conf:/usr/local/etc/php-fpm.d/zz-docker.conf
+      - ./php/conf.d/my.ini:/usr/local/etc/php/conf.d/my.ini
+      - ./php/cron.d/ctc:/etc/cron.d/ctc
+      - ./php/supervisor/conf.d:/etc/supervisor/conf.d
+      - ./php/supervisor/log:/var/log/supervisor
+    command: ["supervisord", "-n"]
+    networks:
+      - koogua
+    restart: always
+
+  mysql:
+    build: ./mysql
+    image: ctc/mysql:latest
+    container_name: ctc-mysql
+    expose:
+      - 3306
+    volumes:
+      - ./mysql/conf.d/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/log:/var/log/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    networks:
+      - koogua
+    restart: always
+
+  redis:
+    build: ./redis
+    image: ctc/redis:latest
+    container_name: ctc-redis
+    expose:
+      - 6379
+    volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./redis/data:/data
+    environment:
+      - SKIP_FIX_PERMS=1
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf", "--requirepass", "${REDIS_PASSWORD}"]
+    networks:
+      - koogua
+    restart: always
+
+  xunsearch:
+    build: ./xunsearch
+    image: ctc/xunsearch:latest
+    container_name: ctc-xunsearch
+    expose:
+      - 8383
+      - 8384
+    volumes:
+      - ./xunsearch/data:/usr/local/xunsearch/data
+    networks:
+      - koogua
+    restart: always
+
+networks:
+  koogua:
+    driver: bridge

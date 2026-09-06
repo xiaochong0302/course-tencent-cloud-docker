@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+
+#docker目录
+DOCKER_DIR=~/ctc-docker
+
+#ctc目录
+CTC_DIR="${DOCKER_DIR}/html/ctc"
+
+#static.sh
+static_sh="${DOCKER_DIR}/static.sh"
+
+#普通信息输出
+normal_print() {
+  echo -e "\033[34m \n $1 \n \033[0m"
+}
+
+#成功信息输出
+success_print() {
+  echo -e "\033[32m \n $1 \n \033[0m"
+}
+
+#失败信息输出
+error_print() {
+  echo -e "\033[31m \n $1 \n \033[0m"
+}
+
+if [ ! -d "${CTC_DIR}" ]; then
+  error_print "------ ctc dir not found ------"
+  exit 1
+fi
+
+normal_print "------ git pull ctc-pro-v2-docker ------"
+
+#拉取docker更新
+cd ${DOCKER_DIR} && git pull --no-rebase
+
+normal_print "------ git pull ctc-pro-v2 ------"
+
+#拉取ctc源码更新
+cd ${CTC_DIR} && git pull --no-rebase
+
+#同步静态资源文件
+if [ -f "${static_sh}" ]; then
+    normal_print "------ sync static files ------"
+    bash "${static_sh}"
+fi
+
+normal_print "------ ctc-pro-v2 upgrade ------"
+
+#使用www-data用户运行，避免权限问题
+docker exec -i --user www-data:www-data ctc-php bash <<'EOF'
+
+#切换到ctc目录
+cd /var/www/html/ctc || exit
+
+#安装依赖包
+composer install --no-dev
+composer dump-autoload --optimize
+
+#数据迁移
+vendor/bin/phinx migrate
+
+#程序升级
+php console.php upgrade
+
+exit
+EOF
+
+normal_print "------ restart queue ------"
+
+#重启队列
+docker exec -i ctc-php supervisorctl restart queue-main-worker
+sleep 5
+docker exec -i ctc-php supervisorctl status queue-main-worker
+
+docker exec -i ctc-php supervisorctl restart queue-notice-worker
+sleep 5
+docker exec -i ctc-php supervisorctl status queue-notice-worker
+
+success_print "------ upgrade finished ------"
