@@ -22,8 +22,6 @@ services:
     build: ./php
     image: ctc/php:latest
     container_name: ctc-php
-    ports:
-      - "8282:8282"
     expose:
       - 9000
     volumes:

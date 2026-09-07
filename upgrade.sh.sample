@@ -6,9 +6,6 @@ DOCKER_DIR=~/ctc-docker
 #ctc目录
 CTC_DIR="${DOCKER_DIR}/html/ctc"
 
-#static.sh
-static_sh="${DOCKER_DIR}/static.sh"
-
 #普通信息输出
 normal_print() {
   echo -e "\033[34m \n $1 \n \033[0m"
@@ -29,23 +26,17 @@ if [ ! -d "${CTC_DIR}" ]; then
   exit 1
 fi
 
-normal_print "------ git pull ctc-pro-v2-docker ------"
+normal_print "------ git pull ctc-v2-docker ------"
 
 #拉取docker更新
 cd ${DOCKER_DIR} && git pull --no-rebase
 
-normal_print "------ git pull ctc-pro-v2 ------"
+normal_print "------ git pull ctc-v2 ------"
 
 #拉取ctc源码更新
 cd ${CTC_DIR} && git pull --no-rebase
 
-#同步静态资源文件
-if [ -f "${static_sh}" ]; then
-    normal_print "------ sync static files ------"
-    bash "${static_sh}"
-fi
-
-normal_print "------ ctc-pro-v2 upgrade ------"
+normal_print "------ ctc-v2 upgrade ------"
 
 #使用www-data用户运行，避免权限问题
 docker exec -i --user www-data:www-data ctc-php bash <<'EOF'
@@ -72,9 +63,5 @@ normal_print "------ restart queue ------"
 docker exec -i ctc-php supervisorctl restart queue-main-worker
 sleep 5
 docker exec -i ctc-php supervisorctl status queue-main-worker
-
-docker exec -i ctc-php supervisorctl restart queue-notice-worker
-sleep 5
-docker exec -i ctc-php supervisorctl status queue-notice-worker
 
 success_print "------ upgrade finished ------"
