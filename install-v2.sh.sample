@@ -533,7 +533,7 @@ echo -e "\n------ php console upgrade ------\n"
 #程序升级
 php console.php upgrade
 
-echo -e "\n------ xunsearch index rebuild ------\n"
+echo -e "\n------ rebuild xunsearch index ------\n"
 
 #重建xunsearch索引
 php console.php course_index rebuild
