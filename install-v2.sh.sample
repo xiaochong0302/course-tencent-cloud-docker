@@ -451,7 +451,7 @@ load_docker_images() {
   load_docker_image "${base_dir}" "${download_dir}" "ctc/mysql:latest" "mysql-8.4-oracle.tar.gz" "mysql:8.4-oracle"
   load_docker_image "${base_dir}" "${download_dir}" "ctc/redis:latest" "redis-8.2-bookworm.tar.gz" "redis:8.2-bookworm"
   load_docker_image "${base_dir}" "${download_dir}" "ctc/xunsearch:latest" "hightman-xunsearch-latest.tar.gz" "hightman/xunsearch:latest"
-  load_docker_image "${base_dir}" "${download_dir}" "ctc/php:latest" "xiaochong0302-php-ctc-pro-v2.tar.gz" "xiaochong0302/php:ctc-pro-v2"
+  load_docker_image "${base_dir}" "${download_dir}" "ctc/php:latest" "xiaochong0302-php-ctc-phalcon-5.20.3.tar.gz" "xiaochong0302/php:ctc-phalcon-5.20.3"
 }
 
 #启动docker服务
