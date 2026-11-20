@@ -12,14 +12,14 @@ server {
     error_log /var/log/nginx/ctc.error.log;
 
     client_max_body_size 100M;
-    fastcgi_read_timeout 600;
-    fastcgi_send_timeout 600;
 
     location / {
         try_files $uri $uri/ /index.php?_url=$uri&$args;
     }
 
     location ~ \.php$ {
+
+        try_files $uri =404;
 
         include fastcgi_params;
 
@@ -29,6 +29,8 @@ server {
         fastcgi_param HTTP_X_FORWARDED_FOR $http_x_forwarded_for;
         fastcgi_param HTTP_X_REAL_IP $http_x_real_ip;
         fastcgi_param HTTP_HOST $http_host;
+        fastcgi_read_timeout 600s;
+        fastcgi_send_timeout 600s;
     }
 
     location ~ /\.(ht|git) {
@@ -37,7 +39,7 @@ server {
     }
 
     location ~* \.(js|css|png|jpg|jpeg|webp|gif|ico)$ {
-        expires max;
+        expires 1y;
         log_not_found off;
         access_log off;
     }

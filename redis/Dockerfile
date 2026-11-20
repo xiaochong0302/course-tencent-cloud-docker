@@ -1,4 +1,4 @@
-FROM redis:8.2-bookworm
+FROM redis:8.10-trixie
 
 ARG TZ=Asia/Shanghai
 
