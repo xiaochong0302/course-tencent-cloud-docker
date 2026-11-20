@@ -1,4 +1,4 @@
-FROM xiaochong0302/php:ctc-phalcon-5.20.3
+FROM xiaochong0302/php:ctc-phalcon-5.23.0
 
 ARG TZ=Asia/Shanghai
 ARG PHP_INI_DIR=/usr/local/etc/php
