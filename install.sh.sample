@@ -64,7 +64,7 @@ os_type() {
       echo "alpine"
       ;;
     *)
-    #衍生版处理
+
     if [[ "$os_like" =~ (rhel|centos|fedora) ]]; then
       echo "rhel"
     elif [[ "$os_like" =~ suse ]]; then
@@ -174,7 +174,6 @@ parse_args() {
     esac
   done
 
-  #检查--domain参数
   if [ -z "${SITE_DOMAIN}" ]; then
     error_print "--domain param is required"
     exit 1
@@ -194,13 +193,15 @@ install_packages() {
       ;;
     rhel)
       if command -v dnf &>/dev/null; then
-        dnf install -y curl git nmap-ncat
+        dnf install --refresh -y curl git nmap-ncat
       else
+        yum check-update
         yum install -y curl git nmap-ncat
       fi
       ;;
     suse)
-      zypper install -y curl git netcat-openbsd
+      zypper --non-interactive refresh
+      zypper --non-interactive install -y curl git netcat-openbsd
       ;;
     alpine)
       apk add --no-cache curl git netcat-openbsd bash
